@@ -12,8 +12,8 @@ let tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.
 
 // API
 
-// GET All Tours
-app.get("/api/v1/tours", (req, res) => {
+// RouteHandlers
+const getAllTours = (req, res) => {
     res.status(200).json({
         status: "success",
         results: tours.length,
@@ -21,10 +21,9 @@ app.get("/api/v1/tours", (req, res) => {
             tours,
         },
     });
-});
+};
 
-// Create New Tour
-app.post("/api/v1/tours", (req, res) => {
+const addNewTour = (req, res) => {
     const tour = {
         id: tours.length,
         ...req.body,
@@ -51,10 +50,9 @@ app.post("/api/v1/tours", (req, res) => {
             });
         }
     );
-});
+};
 
-// Get a single tour
-app.get("/api/v1/tours/:id", (req, res) => {
+const getSingleTour = (req, res) => {
     const tour = tours.find((tour) => tour.id === +req.params.id);
     if (!tour) {
         return res.status(404).json({
@@ -68,10 +66,9 @@ app.get("/api/v1/tours/:id", (req, res) => {
             tour,
         },
     });
-});
+};
 
-// Update a single tour
-app.patch("/api/v1/tours/:id", (req, res) => {
+const updateSingleTour = (req, res) => {
     let tour = tours.find((tour) => tour.id === +req.params.id);
     if (!tour) {
         return res.status(404).json({
@@ -106,10 +103,9 @@ app.patch("/api/v1/tours/:id", (req, res) => {
             });
         }
     );
-});
+};
 
-// Delete a single tour
-app.delete("/api/v1/tours/:id", (req, res) => {
+const deleteSingleTour = (req, res) => {
     const tour = tours.find((tour) => tour.id === +req.params.id);
     if (!tour) {
         return res.status(404).json({
@@ -137,7 +133,11 @@ app.delete("/api/v1/tours/:id", (req, res) => {
             });
         }
     );
-});
+};
+// Routes
+app.route("/api/v1/tours").get(getAllTours).post(addNewTour);
+app.route("/api/v1/tours/:id").get(getSingleTour).patch(updateSingleTour).delete(deleteSingleTour);
+
 // Starting server
 app.listen(port, () => {
     console.log("Server listening on port " + port);
