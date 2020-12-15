@@ -1,0 +1,18 @@
+const express = require("express");
+
+const app = express();
+const port = 8000;
+
+app.get("/", (req, res) => {
+    res.send("Hello, world!");
+});
+
+app.post("/", (req, res) => {
+    res.status(200).json({
+        message: "Hello, Express",
+    });
+});
+// Starting server
+app.listen(port, () => {
+    console.log("Server listening on port " + port);
+});

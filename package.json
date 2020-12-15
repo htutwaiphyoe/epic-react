@@ -1,0 +1,23 @@
+{
+  "name": "natours",
+  "version": "1.0.0",
+  "description": "Node.js Application",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/htutwaiphyoe/Natours-Node.js.git"
+  },
+  "author": "Htut Wai Phyoe",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/htutwaiphyoe/Natours-Node.js/issues"
+  },
+  "homepage": "https://github.com/htutwaiphyoe/Natours-Node.js#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.6"
+  }
+}
