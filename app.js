@@ -43,7 +43,7 @@ app.post("/api/v1/tours", (req, res) => {
                     },
                 });
             }
-            res.status(200).json({
+            res.status(201).json({
                 status: "success",
                 data: {
                     tour,
@@ -51,6 +51,23 @@ app.post("/api/v1/tours", (req, res) => {
             });
         }
     );
+});
+
+// Get a single tour
+app.get("/api/v1/tours/:id", (req, res) => {
+    const tour = tours.find((tour) => tour.id === +req.params.id);
+    if (!tour) {
+        return res.status(404).json({
+            status: "fail",
+            message: "Tour not found",
+        });
+    }
+    res.status(200).json({
+        status: "success",
+        data: {
+            tour,
+        },
+    });
 });
 // Starting server
 app.listen(port, () => {
