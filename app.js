@@ -1,15 +1,17 @@
+const fs = require("fs");
 const express = require("express");
 
 const app = express();
 const port = 8000;
 
-app.get("/", (req, res) => {
-    res.send("Hello, world!");
-});
-
-app.post("/", (req, res) => {
+const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`, "utf8"));
+app.get("/api/v1/tours", (req, res) => {
     res.status(200).json({
-        message: "Hello, Express",
+        status: "success",
+        results: tours.length,
+        data: {
+            tours,
+        },
     });
 });
 // Starting server
