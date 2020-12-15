@@ -31,12 +31,12 @@ app.post("/api/v1/tours", (req, res) => {
     };
     tours.push(tour);
     fs.writeFile(
-        `${__dirname}/dev-data/data/tours-simplejson`,
+        `${__dirname}/dev-data/data/tours-simple.json`,
         JSON.stringify(tours),
         "utf-8",
         (err) => {
             if (err) {
-                res.status(500).json({
+                return res.status(500).json({
                     status: "error",
                     error: {
                         message: "Server error",
@@ -68,6 +68,44 @@ app.get("/api/v1/tours/:id", (req, res) => {
             tour,
         },
     });
+});
+
+// Update a single tour
+app.patch("/api/v1/tours/:id", (req, res) => {
+    let tour = tours.find((tour) => tour.id === +req.params.id);
+    if (!tour) {
+        return res.status(404).json({
+            status: "fail",
+            message: "Tour not found",
+        });
+    }
+    tour = {
+        ...tour,
+        ...req.body,
+    };
+    tours[+req.params.id] = tour;
+
+    fs.writeFile(
+        `${__dirname}/dev-data/data/tours-simple.json`,
+        JSON.stringify(tours),
+        "utf-8",
+        (err) => {
+            if (err) {
+                return res.status(500).json({
+                    status: "error",
+                    error: {
+                        message: "Server error",
+                    },
+                });
+            }
+            res.status(200).json({
+                status: "success",
+                data: {
+                    tour,
+                },
+            });
+        }
+    );
 });
 // Starting server
 app.listen(port, () => {
