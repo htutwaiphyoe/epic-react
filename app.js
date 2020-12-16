@@ -143,11 +143,44 @@ const deleteSingleTour = (req, res) => {
         }
     );
 };
+
+const getAllUsers = (req, res) => {
+    res.status(500).json({
+        status: "error",
+        message: "No route yet implemented",
+    });
+};
+const addNewUser = (req, res) => {
+    res.status(500).json({
+        status: "error",
+        message: "No route yet implemented",
+    });
+};
+const getSingleUser = (req, res) => {
+    res.status(500).json({
+        status: "error",
+        message: "No route yet implemented",
+    });
+};
+const updateSingleUser = (req, res) => {
+    res.status(500).json({
+        status: "error",
+        message: "No route yet implemented",
+    });
+};
+const deleteSingleUser = (req, res) => {
+    res.status(500).json({
+        status: "error",
+        message: "No route yet implemented",
+    });
+};
 // Routes
+// Tours
 app.route("/api/v1/tours").get(getAllTours).post(addNewTour);
-
 app.route("/api/v1/tours/:id").get(getSingleTour).patch(updateSingleTour).delete(deleteSingleTour);
-
+// Users
+app.route("/api/v1/users").get(getAllUsers).post(addNewUser);
+app.route("/api/v1/users/:id").get(getSingleUser).patch(updateSingleUser).delete(deleteSingleUser);
 // Starting server
 app.listen(port, () => {
     console.log("Server listening on port " + port);
