@@ -7,6 +7,12 @@ const port = 8000;
 // Middleware
 // body parser
 app.use(express.json());
+
+app.use((req, res, next) => {
+    req.createdAt = Date.now();
+    console.log("Hello, middleware world!");
+    next();
+});
 // Top level code
 let tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`, "utf8"));
 
@@ -62,6 +68,7 @@ const getSingleTour = (req, res) => {
     }
     res.status(200).json({
         status: "success",
+        createdAt: req.createdAt,
         data: {
             tour,
         },
@@ -136,6 +143,7 @@ const deleteSingleTour = (req, res) => {
 };
 // Routes
 app.route("/api/v1/tours").get(getAllTours).post(addNewTour);
+
 app.route("/api/v1/tours/:id").get(getSingleTour).patch(updateSingleTour).delete(deleteSingleTour);
 
 // Starting server
