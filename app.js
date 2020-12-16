@@ -11,6 +11,8 @@ const app = express();
 app.use(morgan("dev"));
 // body parser
 app.use(express.json());
+// static file
+app.use(express.static(`${__dirname}/public`));
 
 // Routes Middleware
 app.use("/api/v1/tours", tourRouter);
