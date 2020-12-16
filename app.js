@@ -8,7 +8,11 @@ const app = express();
 
 // Middleware
 // logger
-app.use(morgan("dev"));
+
+if (process.env.NODE_ENV === "development") {
+    app.use(morgan("dev"));
+}
+
 // body parser
 app.use(express.json());
 // static file
