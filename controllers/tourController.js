@@ -5,7 +5,6 @@ let tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simp
 
 exports.checkId = (req, res, next, value) => {
     req.tour = tours.find((tour) => tour.id === +req.params.id);
-    console.log(req.tour);
     if (!req.tour) {
         return res.status(404).json({
             status: "fail",
