@@ -3,6 +3,18 @@
 // Own modules
 const Tour = require("../models/tourModel");
 
+exports.aliasTop5 = (req, res, next) => {
+    req.query.sort = "-price,-ratingsAverage";
+    req.query.limit = 5;
+    req.query.fields = "name,price,duration,ratingsAverage,difficulty,summary";
+    next();
+};
+exports.aliasCheapest = (req, res, next) => {
+    req.query.sort = "price,-ratingsAverage";
+    req.query.limit = 5;
+    req.query.fields = "name,price,duration,ratingsAverage,difficulty,summary";
+    next();
+};
 exports.getAllTours = async (req, res) => {
     try {
         // Filetering query
@@ -32,17 +44,17 @@ exports.getAllTours = async (req, res) => {
         }
 
         // pagination
-        if (req.query.page && req.query.limit) {
-            const skip = (+req.query.page - 1) * req.query.limit;
+        const limit = +req.query.limit || 10;
+        const page = +req.query.page || 1;
+        const skip = (page - 1) * limit;
+        query = query.skip(skip).limit(limit);
+
+        if (req.query.page) {
             const numOfTours = await Tour.countDocuments();
             if (skip >= numOfTours) {
                 throw new Error("No more documents");
             }
-            query = query.skip(skip).limit(+req.query.limit);
-        } else {
-            query = query.skip(0).limit(1);
         }
-        console.log(req.query, queryObj);
         // execute query
         const tours = await query;
 
