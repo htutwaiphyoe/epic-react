@@ -55,7 +55,25 @@ exports.getSingleTour = async (req, res) => {
     }
 };
 
-exports.updateSingleTour = (req, res) => {
+exports.updateSingleTour = async (req, res) => {
+    try {
+        const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+
+        res.status(200).json({
+            status: "success",
+            data: {
+                tour,
+            },
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: "fail",
+            message: "Invalid id",
+        });
+    }
     // req.tour = {
     //     ...req.tour,
     //     ...req.body,
