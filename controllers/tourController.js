@@ -71,56 +71,22 @@ exports.updateSingleTour = async (req, res) => {
     } catch (err) {
         res.status(404).json({
             status: "fail",
-            message: "Invalid id",
+            message: err.message,
         });
     }
-    // req.tour = {
-    //     ...req.tour,
-    //     ...req.body,
-    // };
-    // tours[+req.params.id] = req.tour;
-    // fs.writeFile(
-    //     `${__dirname}/../dev-data/data/tours-simple.json`,
-    //     JSON.stringify(tours),
-    //     "utf-8",
-    //     (err) => {
-    //         if (err) {
-    //             return res.status(500).json({
-    //                 status: "error",
-    //                 error: {
-    //                     message: "Server error",
-    //                 },
-    //             });
-    //         }
-    //         res.status(200).json({
-    //             status: "success",
-    //             data: {
-    //                 tour: req.tour,
-    //             },
-    //         });
-    //     }
-    // );
 };
 
-exports.deleteSingleTour = (req, res) => {
-    // tours = tours.filter((tour) => tour.id !== +req.params.id);
-    // fs.writeFile(
-    //     `${__dirname}/../dev-data/data/tours-simple.json`,
-    //     JSON.stringify(tours),
-    //     "utf-8",
-    //     (err) => {
-    //         if (err) {
-    //             return res.status(500).json({
-    //                 status: "error",
-    //                 error: {
-    //                     message: "Server error",
-    //                 },
-    //             });
-    //         }
-    //         res.status(204).json({
-    //             status: "success",
-    //             data: null,
-    //         });
-    //     }
-    // );
+exports.deleteSingleTour = async (req, res) => {
+    try {
+        await Tour.findByIdAndDelete(req.params.id);
+        res.status(204).json({
+            status: "success",
+            data: null,
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: "fail",
+            message: err.message,
+        });
+    }
 };
