@@ -3,17 +3,6 @@
 // Own modules
 const Tour = require("../models/tourModel");
 
-
-exports.checkBody = (req, res, next) => {
-    const { name, price } = req.body;
-    if (!name || !price) {
-        return res.status(400).json({
-            status: "fail",
-            message: "Missing name and price",
-        });
-    }
-    next();
-};
 exports.getAllTours = (req, res) => {
     // res.status(200).json({
     //     status: "success",
@@ -24,33 +13,21 @@ exports.getAllTours = (req, res) => {
     // });
 };
 
-exports.addNewTour = (req, res) => {
-    // const tour = {
-    //     id: tours.length,
-    //     ...req.body,
-    // };
-    // tours.push(tour);
-    // fs.writeFile(
-    //     `${__dirname}/../dev-data/data/tours-simple.json`,
-    //     JSON.stringify(tours),
-    //     "utf-8",
-    //     (err) => {
-    //         if (err) {
-    //             return res.status(500).json({
-    //                 status: "error",
-    //                 error: {
-    //                     message: err,
-    //                 },
-    //             });
-    //         }
-    //         res.status(201).json({
-    //             status: "success",
-    //             data: {
-    //                 tour,
-    //             },
-    //         });
-    //     }
-    // );
+exports.addNewTour = async (req, res) => {
+    try {
+        const tour = await Tour.create(req.body);
+        res.status(201).json({
+            status: "success",
+            data: {
+                tour,
+            },
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            message: err,
+        });
+    }
 };
 
 exports.getSingleTour = (req, res) => {
