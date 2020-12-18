@@ -30,6 +30,18 @@ exports.getAllTours = async (req, res) => {
         } else {
             query = query.select("-__v");
         }
+
+        // pagination
+        if (req.query.page && req.query.limit) {
+            const skip = (+req.query.page - 1) * req.query.limit;
+            const numOfTours = await Tour.countDocuments();
+            if (skip >= numOfTours) {
+                throw new Error("No more documents");
+            }
+            query = query.skip(skip).limit(+req.query.limit);
+        } else {
+            query = query.skip(0).limit(1);
+        }
         console.log(req.query, queryObj);
         // execute query
         const tours = await query;
@@ -45,7 +57,7 @@ exports.getAllTours = async (req, res) => {
     } catch (err) {
         res.status(500).json({
             status: "error",
-            message: "Something went wrong",
+            message: err.message,
         });
     }
 };
