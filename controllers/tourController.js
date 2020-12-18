@@ -1,6 +1,7 @@
 // Core modules
 
 // Own modules
+const e = require("express");
 const Tour = require("../models/tourModel");
 
 exports.getAllTours = async (req, res) => {
@@ -14,8 +15,15 @@ exports.getAllTours = async (req, res) => {
         queryObj = JSON.parse(
             JSON.stringify(queryObj).replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`)
         );
+
         // get query
-        const query = Tour.find(queryObj);
+        let query = Tour.find(queryObj);
+        // sorting
+        if (req.query.sort) {
+            query.sort(req.query.sort.split(",").join(" "));
+        } else {
+            query.sort("-createdAt");
+        }
 
         console.log(req.query, queryObj);
         // execute query
