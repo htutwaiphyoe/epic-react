@@ -1,7 +1,6 @@
 // Core modules
 
 // Own modules
-const e = require("express");
 const Tour = require("../models/tourModel");
 
 exports.getAllTours = async (req, res) => {
@@ -20,11 +19,17 @@ exports.getAllTours = async (req, res) => {
         let query = Tour.find(queryObj);
         // sorting
         if (req.query.sort) {
-            query.sort(req.query.sort.split(",").join(" "));
+            query = query.sort(req.query.sort.split(",").join(" "));
         } else {
-            query.sort("-createdAt");
+            query = query.sort("-createdAt");
         }
 
+        // fields limiting
+        if (req.query.fields) {
+            query = query.select(req.query.fields.split(",").join(" "));
+        } else {
+            query = query.select("-__v");
+        }
         console.log(req.query, queryObj);
         // execute query
         const tours = await query;
