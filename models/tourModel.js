@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// schema
 const tourSchema = new mongoose.Schema(
     {
         name: {
@@ -76,22 +77,19 @@ tourSchema.pre("save", function (next) {
     next();
 });
 
-// tourSchema.post("save", (doc, next) => {
-//     console.log(doc);
-//     next();
-// });
-
 // query middleware
 tourSchema.pre(/^find/, function (next) {
     this.find({ secret: { $ne: true } });
-    // this.start = Date.now();
     next();
 });
 
-// tourSchema.post(/^find/, function (doc, next) {
-//     console.log(Date.now() - this.start);
-//     next();
-// });
+// aggregation middleware
+tourSchema.pre("aggregate", function (next) {
+    this.pipeline().unshift({ $match: { secret: { $ne: true } } });
+    next();
+});
+
+// model
 const Tour = mongoose.model("Tour", tourSchema);
 
 module.exports = Tour;
