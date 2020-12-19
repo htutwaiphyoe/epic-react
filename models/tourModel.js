@@ -10,6 +10,12 @@ const tourSchema = new mongoose.Schema(
             trim: true,
             minLength: [10, "Name must be at least 10 characters"],
             maxLength: [40, "Name must be at most 40 characters"],
+            validate: {
+                validator: function (value) {
+                    return /^[a-zA-Z ]*$/.test(value);
+                },
+                message: "Name must be only characters",
+            },
         },
         slug: String,
         duration: {
@@ -42,7 +48,15 @@ const tourSchema = new mongoose.Schema(
             type: Number,
             required: [true, "Missing price"],
         },
-        priceDiscount: Number,
+        discount: {
+            type: Number,
+            validate: {
+                validator: function (value) {
+                    return (value / 100) * this.price < this.price;
+                },
+                message: "Discount should be between 0 and 100",
+            },
+        },
         summary: {
             type: String,
             required: [true, "Missing summary"],
