@@ -2,7 +2,7 @@
 
 // Own modules
 const Tour = require("../models/tourModel");
-const APIFeatures = require("../Utils/APIFeatures");
+const APIFeatures = require("../utils/APIFeatures");
 
 exports.aliasTop5 = (req, res, next) => {
     req.query.sort = "-price,-ratingsAverage";
