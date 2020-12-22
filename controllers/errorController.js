@@ -26,16 +26,26 @@ const sendProdError = (err, res) => {
 };
 
 const handleCastError = (err) => new AppError(`Invalid ${err.path}: ${err.value}`, 400);
+
+const handleDuplicateKeyError = (err) =>
+    new AppError(
+        `${Object.keys(err.keyValue).join(" ")}: ${err.keyValue.name} is already in use`,
+        400
+    );
+
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || "error";
 
     if (process.env.NODE_ENV === "development") {
-        console.log(err.name);
+        // console.log(err.code, err.keyValue.name);
         sendDevError(err, res);
     } else if (process.env.NODE_ENV === "production") {
         if (err.name === "CastError") {
             err = handleCastError(err);
+        }
+        if (err.code === 11000) {
+            err = handleDuplicateKeyError(err);
         }
         sendProdError(err, res);
     }
