@@ -52,7 +52,7 @@ const tourSchema = new mongoose.Schema(
             type: Number,
             validate: {
                 validator: function (value) {
-                    return (value / 100) * this.price < this.price;
+                    return value < 100 && value > 0;
                 },
                 message: "Discount should be between 0 and 100",
             },
