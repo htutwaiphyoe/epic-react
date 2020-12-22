@@ -14,14 +14,25 @@ mongoose.connect(dbString, {
     useUnifiedTopology: true,
 });
 
-mongoose.connection.on("connected", () => {
-    console.log("Database connected successfully");
-});
-
-mongoose.connection.on("error", (err) => {
-    console.log("Database connection fail", err);
-});
+if (process.env.NODE_ENV === "development") {
+    mongoose.connection.on("connected", () => {
+        console.log("Database connected successfully");
+    });
+    mongoose.connection.on("disconnected", () => {
+        console.log("No internet connection");
+    });
+    mongoose.connection.on("error", (err) => {
+        console.log("Database connection fail");
+    });
+}
 
 const port = process.env.PORT || 8000;
 // Starting server
-app.listen(port, () => {});
+const server = app.listen(port, () => {});
+
+process.on("unhandledRejection", (err) => {
+    console.error("unhandledRejection ", err);
+    server.close(() => {
+        process.exit(1);
+    });
+});
