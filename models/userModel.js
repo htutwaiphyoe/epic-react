@@ -1,5 +1,7 @@
+// third-party modules
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -25,13 +27,35 @@ const userSchema = new mongoose.Schema({
         trim: true,
         minLength: 8,
         required: [true, "Missing password"],
+        select: false,
     },
     comfirmPassword: {
         type: String,
         required: [true, "Missing confirm password"],
+        validate: {
+            validator: function (value) {
+                return value === this.password;
+            },
+            message: "Passwords do not match",
+        },
     },
 });
 
+userSchema.pre("save", async function (next) {
+    try {
+        // run this if password is not changed
+        if (!this.isModified("password")) return next();
+
+        // hash password
+        this.password = await bcrypt.hash(this.password, 12);
+
+        // delete confirmpassword
+        this.comfirmPassword = undefined;
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
