@@ -42,20 +42,21 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre("save", async function (next) {
-    try {
-        // run this if password is not changed
-        if (!this.isModified("password")) return next();
+    // run this if password is not changed
+    if (!this.isModified("password")) return next();
 
-        // hash password
-        this.password = await bcrypt.hash(this.password, 12);
+    // hash password
+    this.password = await bcrypt.hash(this.password, 12);
 
-        // delete confirmpassword
-        this.comfirmPassword = undefined;
-        next();
-    } catch (err) {
-        next(err);
-    }
+    // delete confirmpassword
+    this.comfirmPassword = undefined;
+    next();
 });
+
+// instance methods
+userSchema.methods.checkPassword = async function (inputPassword, hashPassword) {
+    return await bcrypt.compare(inputPassword, hashPassword);
+};
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;

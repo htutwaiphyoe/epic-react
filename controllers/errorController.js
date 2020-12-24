@@ -29,9 +29,9 @@ const sendProdError = (err, res) => {
 const handleCastError = (err) => new AppError(`Invalid ${err.path}: ${err.value}`, 400);
 
 const handleDuplicateKeyError = (err) => {
-    const message = `${Object.keys(err.keyValue).join(" ")}: ${
-        err.keyValue.name
-    } is already in use`;
+    const message = `${Object.keys(err.keyValue).join(" ")}: ${Object.values(err.keyValue).join(
+        " "
+    )} is already in use`;
 
     return new AppError(message, 400);
 };
