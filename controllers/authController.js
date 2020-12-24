@@ -1,5 +1,6 @@
 // third-party modules
 const jwt = require("jsonwebtoken");
+const util = require("util");
 // own modules
 const User = require("../models/userModel");
 const catchError = require("../utils/catchError");
@@ -16,6 +17,7 @@ exports.signup = catchError(async (req, res, next) => {
         email: req.body.email,
         password: req.body.password,
         comfirmPassword: req.body.comfirmPassword,
+        passwordChangedAt: req.body.passwordChangedAt,
     });
 
     const token = getToken(user._id);
@@ -29,8 +31,6 @@ exports.signup = catchError(async (req, res, next) => {
 });
 
 exports.login = catchError(async (req, res, next) => {
-    // TODO:
-
     // retrieve email and password
     const { email, password } = req.body;
 
@@ -64,7 +64,24 @@ exports.protect = catchError(async (req, res, next) => {
         token = req.headers.authorization.split(" ")[1];
     }
     if (!token) {
-        return next(new AppError("You are not logged in."));
+        return next(new AppError("You are not logged in.", 401));
     }
+
+    // verify token
+    const decoded = await util.promisify(jwt.verify)(token, process.env.JWT_SECRET_KEY);
+
+    // check user with id in token
+    const user = await User.findById(decoded.id);
+    if (!user) {
+        return next(new AppError("User does not exist", 401));
+    }
+
+    // check user updates password
+    if (user.checkPasswordUpdate(decoded.iat)) {
+        return next(new AppError("User changed password. Please login again!", 401));
+    }
+
+    // get user and grant access to protected routes
+    req.user = user;
     next();
 });
