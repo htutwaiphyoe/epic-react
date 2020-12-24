@@ -17,7 +17,6 @@ exports.signup = catchError(async (req, res, next) => {
         email: req.body.email,
         password: req.body.password,
         comfirmPassword: req.body.comfirmPassword,
-        passwordChangedAt: req.body.passwordChangedAt,
     });
 
     const token = getToken(user._id);
@@ -85,3 +84,11 @@ exports.protect = catchError(async (req, res, next) => {
     req.user = user;
     next();
 });
+
+exports.restrict = (req, res, next) => {
+    // check user is admin
+    if (req.user.role !== "admin") {
+        return next(new AppError("You do not have permission", 403));
+    }
+    next();
+};
