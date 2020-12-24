@@ -1,3 +1,6 @@
+// core modules
+const crypto = require("crypto");
+
 // third-party modules
 const mongoose = require("mongoose");
 const validator = require("validator");
@@ -47,6 +50,8 @@ const userSchema = new mongoose.Schema({
     passwordChangedAt: {
         type: Date,
     },
+    passwordResetToken: String,
+    passwordResetExprieIn: String,
 });
 
 userSchema.pre("save", async function (next) {
@@ -72,6 +77,14 @@ userSchema.methods.checkPasswordUpdate = function (jwttimestamp) {
         return jwttimestamp < changedAt;
     }
     return false;
+};
+
+userSchema.methods.generatePasswordResetToken = function () {
+    const token = crypto.randomBytes(32).toString("hex");
+    this.passwordResetToken = crypto.createHash("sha256").update(token).digest("hex");
+    console.log(token, this.passwordResetToken);
+    this.passwordResetExprieIn = Date.now() + 10 * 60 * 1000;
+    return token;
 };
 const User = mongoose.model("User", userSchema);
 

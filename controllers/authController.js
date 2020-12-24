@@ -1,6 +1,7 @@
 // third-party modules
 const jwt = require("jsonwebtoken");
 const util = require("util");
+const validator = require("validator");
 // own modules
 const User = require("../models/userModel");
 const catchError = require("../utils/catchError");
@@ -92,3 +93,30 @@ exports.restrict = (req, res, next) => {
     }
     next();
 };
+
+exports.forgotPassword = catchError(async (req, res, next) => {
+    // get email
+    const { email } = req.body;
+    if (!email) {
+        return next(new AppError("Missing email", 400));
+    }
+    // check email
+    if (!validator.isEmail(email)) {
+        return next(new AppError("Invalid email", 400));
+    }
+
+    // get user with email
+    const user = await User.findOne({ email });
+
+    // check user
+    if (!user) {
+        return next(new AppError("No user found", 404));
+    }
+
+    // generate password reset token
+    const token = user.generatePasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+    next();
+});
+
+exports.resetPassword = catchError(async (req, res, next) => {});
