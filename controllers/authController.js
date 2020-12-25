@@ -14,6 +14,14 @@ const getToken = (id) =>
         expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
+const sendResponseWithToken = (user, statusCode, res, data = undefined) => {
+    const token = getToken(user._id);
+    res.status(statusCode).json({
+        status: "success",
+        token,
+        data,
+    });
+};
 exports.signup = catchError(async (req, res, next) => {
     const user = await User.create({
         name: req.body.name,
@@ -21,15 +29,7 @@ exports.signup = catchError(async (req, res, next) => {
         password: req.body.password,
         confirmPassword: req.body.confirmPassword,
     });
-
-    const token = getToken(user._id);
-    res.status(201).json({
-        status: "success",
-        token,
-        data: {
-            user,
-        },
-    });
+    sendResponseWithToken(user, 201, res, { user });
 });
 
 exports.login = catchError(async (req, res, next) => {
@@ -48,14 +48,8 @@ exports.login = catchError(async (req, res, next) => {
         return next(new AppError("Incorrect email or password", 401));
     }
 
-    // get token
-    const token = getToken(user._id);
-
     // send response
-    res.status(200).json({
-        status: "success",
-        token,
-    });
+    sendResponseWithToken(user, 200, res);
 });
 
 exports.protect = catchError(async (req, res, next) => {
@@ -162,9 +156,26 @@ exports.resetPassword = catchError(async (req, res, next) => {
     await user.save();
 
     // send response with new jwt
-    const token = getToken(user._id);
-    res.status(200).json({
-        status: "success",
-        token,
-    });
+    sendResponseWithToken(user, 200, res);
+});
+
+exports.updatePassword = catchError(async (req, res, next) => {
+    // retrieve user
+    const user = await User.findById(req.user._id).select("+password");
+    // check old password
+    const { oldPassword, newPassword, newConfirmPassword } = req.body;
+    if (!oldPassword || !newPassword || !newConfirmPassword) {
+        return next(new AppError("Please fill the form", 400));
+    }
+    if (!(await user.checkPassword(oldPassword, user.password))) {
+        return next(new AppError("Incorrect password", 400));
+    }
+
+    // update password
+    user.password = newPassword;
+    user.confirmPassword = newConfirmPassword;
+    await user.save();
+
+    // send token
+    sendResponseWithToken(user, 200, res);
 });
