@@ -2,7 +2,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
-
+const helmet = require("helmet");
 // own modules
 const tourRouter = require("./routers/tourRouter");
 const userRouter = require("./routers/userRouter");
@@ -12,6 +12,8 @@ const globalErrorController = require("./controllers/errorController");
 const app = express();
 
 // Middleware
+// secure http headers
+app.use(helmet());
 // rate limiter
 const limiter = rateLimit({
     max: 100,
@@ -26,7 +28,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // body parser
-app.use(express.json());
+app.use(express.json({ limit: "100kb" }));
 // static file
 app.use(express.static(`${__dirname}/public`));
 
