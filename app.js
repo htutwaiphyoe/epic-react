@@ -3,6 +3,7 @@ const express = require("express");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
 // own modules
 const tourRouter = require("./routers/tourRouter");
 const userRouter = require("./routers/userRouter");
@@ -29,6 +30,10 @@ if (process.env.NODE_ENV === "development") {
 
 // body parser
 app.use(express.json({ limit: "100kb" }));
+
+// NoSQL injection
+app.use(mongoSanitize());
+
 // static file
 app.use(express.static(`${__dirname}/public`));
 
