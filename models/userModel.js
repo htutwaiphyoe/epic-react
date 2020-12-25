@@ -37,15 +37,16 @@ const userSchema = new mongoose.Schema({
         required: [true, "Missing password"],
         select: false,
     },
-    comfirmPassword: {
+    confirmPassword: {
         type: String,
-        required: [true, "Missing confirm password"],
+
         validate: {
             validator: function (value) {
                 return value === this.password;
             },
             message: "Passwords do not match",
         },
+        required: [true, "Missing confirm password"],
     },
     passwordChangedAt: {
         type: Date,
@@ -54,6 +55,7 @@ const userSchema = new mongoose.Schema({
     passwordResetExprieIn: String,
 });
 
+// document middleware
 userSchema.pre("save", async function (next) {
     // run this if password is not changed
     if (!this.isModified("password")) return next();
@@ -62,10 +64,15 @@ userSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, 12);
 
     // delete confirmpassword
-    this.comfirmPassword = undefined;
+    this.confirmPassword = undefined;
     next();
 });
 
+userSchema.pre("save", function (next) {
+    if (!this.isModified("password") || this.isNew) return next();
+    this.passwordChangedAt = Date.now() - 5000;
+    next();
+});
 // instance methods
 userSchema.methods.checkPassword = async function (inputPassword, hashPassword) {
     return await bcrypt.compare(inputPassword, hashPassword);
