@@ -4,6 +4,8 @@ const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+
 // own modules
 const tourRouter = require("./routers/tourRouter");
 const userRouter = require("./routers/userRouter");
@@ -34,6 +36,8 @@ app.use(express.json({ limit: "100kb" }));
 // NoSQL injection
 app.use(mongoSanitize());
 
+// xss
+app.use(xss());
 // static file
 app.use(express.static(`${__dirname}/public`));
 
