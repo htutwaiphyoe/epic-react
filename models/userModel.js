@@ -53,6 +53,11 @@ const userSchema = new mongoose.Schema({
     },
     passwordResetToken: String,
     passwordResetExprieIn: String,
+    active: {
+        type: Boolean,
+        default: true,
+        select: false,
+    },
 });
 
 // document middleware
@@ -68,6 +73,11 @@ userSchema.pre("save", async function (next) {
     next();
 });
 
+// query middleware
+userSchema.pre(/^find/, function (next) {
+    this.find({ active: { $ne: false } });
+    next();
+});
 userSchema.pre("save", function (next) {
     if (!this.isModified("password") || this.isNew) return next();
     this.passwordChangedAt = Date.now() - 5000;
