@@ -2,8 +2,19 @@
 
 ## Technologies
 
--   Node.js
--   Express.js
--   MongoDB
--   mongoose
--   ndb (node debugger)
+-   Main Stack
+
+    -   Node.js
+    -   Express.js
+    -   MongoDB
+    -   mongoose
+
+-   Third-party dependencies
+    -   ndb (node debugger)
+    -   dotenv
+    -   jsonwebtoken
+    -   nodemailer
+    -   validator
+    -   bcryptjs
+    -   nodemon
+    -   morgan
