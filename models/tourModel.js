@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// own modules
 // schema
 const tourSchema = new mongoose.Schema(
     {
@@ -81,7 +82,7 @@ const tourSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        startLocations: {
+        startLocation: {
             type: {
                 type: String,
                 default: "Point",
@@ -103,6 +104,7 @@ const tourSchema = new mongoose.Schema(
                 day: Number,
             },
         ],
+        guides: Array,
     },
     {
         toJSON: { virtuals: true },
