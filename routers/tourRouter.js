@@ -3,10 +3,15 @@ const express = require("express");
 // Own modules
 const tourController = require("../controllers/tourController");
 const authController = require("../controllers/authController");
-const reviewController = require("../controllers/reviewController");
+const reviewRouter = require("./reviewRouter");
 
 const router = express.Router();
+// param middleware
 // router.param("id", tourController.checkId);
+// nested routes
+// router.route("/:tourId/reviews").post(authController.protect, reviewController.createNewReview);
+router.use("/:tourId/reviews", reviewRouter);
+
 router.route("/top-5").get(tourController.aliasTop5, tourController.getAllTours);
 
 router.route("/cheapest").get(tourController.aliasCheapest, tourController.getAllTours);
@@ -27,6 +32,6 @@ router
     .delete(authController.protect, authController.restrict, tourController.deleteSingleTour);
 
 // nested routes
-router.route("/:tourId/reviews").post(authController.protect, reviewController.createNewReview);
+// router.route("/:tourId/reviews").post(authController.protect, reviewController.createNewReview);
 
 module.exports = router;
