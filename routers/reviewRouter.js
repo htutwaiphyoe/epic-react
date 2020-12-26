@@ -10,6 +10,6 @@ const router = express.Router();
 router
     .route("/")
     .get(authController.protect, reviewController.getAllReviews)
-    .post(authController.protect, authController.restrict, reviewController.createNewReview);
+    .post(authController.protect, reviewController.createNewReview);
 
 module.exports = router;
