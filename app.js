@@ -10,6 +10,8 @@ const hpp = require("hpp");
 // own modules
 const tourRouter = require("./routers/tourRouter");
 const userRouter = require("./routers/userRouter");
+const reviewRouter = require("./routers/reviewRouter");
+
 const AppError = require("./utils/AppError");
 const globalErrorController = require("./controllers/errorController");
 
@@ -52,6 +54,7 @@ app.use(express.static(`${__dirname}/public`));
 // Routes Middleware
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/reviews", reviewRouter);
 
 // Unhandled routes middleware
 app.all("*", (req, res, next) => {
