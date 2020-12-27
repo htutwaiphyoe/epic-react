@@ -2,6 +2,7 @@
 // const AppError = require("../utils/AppError");
 const catchError = require("../utils/catchError");
 const Review = require("../models/reviewModel");
+const controllerFactory = require("../factory/controllerFactory");
 
 exports.getAllReviews = catchError(async (req, res, next) => {
     let filter = {};
@@ -27,3 +28,5 @@ exports.createNewReview = catchError(async (req, res, next) => {
         },
     });
 });
+
+exports.deleteSingleReview = controllerFactory.deleteOne(Review);

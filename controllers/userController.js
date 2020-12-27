@@ -2,6 +2,7 @@
 const User = require("../models/userModel");
 const catchError = require("../utils/catchError");
 const AppError = require("../utils/AppError");
+const controllerFactory = require("../factory/controllerFactory");
 
 const filterBody = (body, ...allowedFields) => {
     const newBody = {};
@@ -70,9 +71,4 @@ exports.updateSingleUser = (req, res) => {
         message: "No route yet implemented",
     });
 };
-exports.deleteSingleUser = (req, res) => {
-    res.status(500).json({
-        status: "error",
-        message: "No route yet implemented",
-    });
-};
+exports.deleteSingleUser = controllerFactory.deleteOne(User);
