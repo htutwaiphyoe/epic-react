@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+// own modules
+const User = require("./userModel");
 // schema
 const tourSchema = new mongoose.Schema(
     {
@@ -81,7 +83,7 @@ const tourSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        startLocations: {
+        startLocation: {
             type: {
                 type: String,
                 default: "Point",
@@ -103,6 +105,7 @@ const tourSchema = new mongoose.Schema(
                 day: Number,
             },
         ],
+        guides: Array,
     },
     {
         toJSON: { virtuals: true },
@@ -121,6 +124,11 @@ tourSchema.pre("save", function (next) {
     next();
 });
 
+tourSchema.pre("save", async function (next) {
+    const guidePromises = this.guides.map(async (guide) => await User.findById(guide));
+    this.guides = await Promise.all(guidePromises);
+    next();
+});
 // query middleware
 tourSchema.pre(/^find/, function (next) {
     this.find({ secret: { $ne: true } });
