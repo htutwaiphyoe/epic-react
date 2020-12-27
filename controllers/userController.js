@@ -13,6 +13,12 @@ const filterBody = (body, ...allowedFields) => {
     });
     return newBody;
 };
+
+exports.getMe = (req, res, next) => {
+    req.params.id = req.user._id;
+    next();
+};
+
 exports.updateMe = catchError(async (req, res, next) => {
     // check password includes
     if (req.body.password || req.body.confirmPassword) {
