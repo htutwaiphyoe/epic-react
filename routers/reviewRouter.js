@@ -12,7 +12,14 @@ const router = express.Router({ mergeParams: true });
 router
     .route("/")
     .get(authController.protect, reviewController.getAllReviews)
-    .post(authController.protect, reviewController.createNewReview);
+    .post(
+        authController.protect,
+        reviewController.setTourAndUserIds,
+        reviewController.createNewReview
+    );
 
-router.route("/:id").delete(authController.protect, reviewController.deleteSingleReview);
+router
+    .route("/:id")
+    .patch(authController.protect, reviewController.updateSingleReview)
+    .delete(authController.protect, reviewController.deleteSingleReview);
 module.exports = router;

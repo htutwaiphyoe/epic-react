@@ -37,16 +37,7 @@ exports.getAllTours = catchError(async (req, res, next) => {
     });
 });
 
-exports.addNewTour = catchError(async (req, res, next) => {
-    const tour = await Tour.create(req.body);
-
-    res.status(201).json({
-        status: "success",
-        data: {
-            tour,
-        },
-    });
-});
+exports.addNewTour = controllerFactory.createOne(Tour);
 
 exports.getSingleTour = catchError(async (req, res, next) => {
     const tour = await Tour.findById(req.params.id).populate("reviews");
@@ -61,22 +52,7 @@ exports.getSingleTour = catchError(async (req, res, next) => {
     });
 });
 
-exports.updateSingleTour = catchError(async (req, res, next) => {
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true,
-    });
-    if (!tour) {
-        return next(new AppError("No tour found with that id", 404));
-    }
-    res.status(200).json({
-        status: "success",
-        data: {
-            tour,
-        },
-    });
-});
-
+exports.updateSingleTour = controllerFactory.updateOne(Tour);
 exports.deleteSingleTour = controllerFactory.deleteOne(Tour);
 
 exports.getTourStats = catchError(async (req, res, next) => {

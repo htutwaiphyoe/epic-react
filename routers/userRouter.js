@@ -14,11 +14,11 @@ router.patch("/update-password", authController.protect, authController.updatePa
 router.patch("/update-me", authController.protect, userController.updateMe);
 router.delete("/delete-me", authController.protect, userController.deleteMe);
 
-router.route("/").get(userController.getAllUsers).post(userController.addNewUser);
+router.route("/").get(userController.getAllUsers);
 router
     .route("/:id")
     .get(userController.getSingleUser)
-    .patch(userController.updateSingleUser)
+    .patch(authController.protect, authController.restrict, userController.updateSingleUser)
     .delete(authController.protect, authController.restrict, userController.deleteSingleUser);
 
 module.exports = router;
