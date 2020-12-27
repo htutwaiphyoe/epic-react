@@ -20,6 +20,8 @@ router
 
 router
     .route("/:id")
+    .get(authController.protect, reviewController.getSingleReview)
     .patch(authController.protect, reviewController.updateSingleReview)
     .delete(authController.protect, reviewController.deleteSingleReview);
+
 module.exports = router;

@@ -2,8 +2,6 @@
 
 // Own modules
 const Tour = require("../models/tourModel");
-const APIFeatures = require("../utils/APIFeatures");
-const AppError = require("../utils/AppError");
 const catchError = require("../utils/catchError");
 const controllerFactory = require("../factory/controllerFactory");
 
@@ -20,38 +18,9 @@ exports.aliasCheapest = (req, res, next) => {
     next();
 };
 
-exports.getAllTours = catchError(async (req, res, next) => {
-    // get query
-    const apiFeatures = new APIFeatures(Tour.find(), req.query).filter().sort().limit().paginate();
-
-    // execute query
-    const tours = await apiFeatures.query;
-
-    // send response
-    res.status(200).json({
-        status: "success",
-        results: tours.length,
-        data: {
-            tours,
-        },
-    });
-});
-
+exports.getAllTours = controllerFactory.getAll(Tour);
 exports.addNewTour = controllerFactory.createOne(Tour);
-
-exports.getSingleTour = catchError(async (req, res, next) => {
-    const tour = await Tour.findById(req.params.id).populate("reviews");
-    if (!tour) {
-        return next(new AppError("No tour found with that id", 404));
-    }
-    res.status(200).json({
-        status: "success",
-        data: {
-            tour,
-        },
-    });
-});
-
+exports.getSingleTour = controllerFactory.getOne(Tour, { path: "reviews" });
 exports.updateSingleTour = controllerFactory.updateOne(Tour);
 exports.deleteSingleTour = controllerFactory.deleteOne(Tour);
 

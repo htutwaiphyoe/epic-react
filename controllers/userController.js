@@ -47,18 +47,8 @@ exports.deleteMe = catchError(async (req, res, next) => {
         data: null,
     });
 });
-exports.getAllUsers = (req, res) => {
-    res.status(500).json({
-        status: "error",
-        message: "No route yet implemented",
-    });
-};
 
-exports.getSingleUser = (req, res) => {
-    res.status(500).json({
-        status: "error",
-        message: "No route yet implemented",
-    });
-};
+exports.getAllUsers = controllerFactory.getAll(User);
+exports.getSingleUser = controllerFactory.getOne(User);
 exports.updateSingleUser = controllerFactory.updateOne(User);
 exports.deleteSingleUser = controllerFactory.deleteOne(User);

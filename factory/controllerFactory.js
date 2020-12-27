@@ -1,6 +1,50 @@
 // own modules
 const catchError = require("../utils/catchError");
 const AppError = require("../utils/AppError");
+const APIFeatures = require("../utils/APIFeatures");
+
+exports.getAll = (Model) =>
+    catchError(async (req, res, next) => {
+        // for get tourid in reviews
+        let filter = {};
+        if (req.params.tourId) filter = { tour: req.params.tourId };
+        // get query
+        const apiFeatures = new APIFeatures(Model.find(filter), req.query)
+            .filter()
+            .sort()
+            .limit()
+            .paginate();
+
+        // execute query
+        const docs = await apiFeatures.query;
+
+        // send response
+        res.status(200).json({
+            status: "success",
+            results: docs.length,
+            data: {
+                data: docs,
+            },
+        });
+    });
+
+exports.getOne = (Model, populateOptions) =>
+    catchError(async (req, res, next) => {
+        let query = Model.findById(req.params.id);
+        if (populateOptions) {
+            query = query.populate(populateOptions);
+        }
+        const doc = await query;
+        if (!doc) {
+            return next(new AppError("No document found with that id", 404));
+        }
+        res.status(200).json({
+            status: "success",
+            data: {
+                data: doc,
+            },
+        });
+    });
 
 exports.createOne = (Model) =>
     catchError(async (req, res, next) => {
