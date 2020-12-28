@@ -156,8 +156,12 @@ tourSchema.pre(/^find/, function (next) {
 });
 // aggregation middleware
 tourSchema.pre("aggregate", function (next) {
-    this.pipeline().unshift({ $match: { secret: { $ne: true } } });
-    next();
+    if (this.pipeline()[0] && Object.keys(this.pipeline()[0]).join("") === "$geoNear") {
+        next();
+    } else {
+        this.pipeline().unshift({ $match: { secret: { $ne: true } } });
+        next();
+    }
 });
 
 // model
