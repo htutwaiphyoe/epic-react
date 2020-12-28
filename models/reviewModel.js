@@ -36,7 +36,8 @@ const reviewSchema = new mongoose.Schema(
         toJSON: { virtuals: true },
     }
 );
-
+// indexes
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 // query middlewares
 // populate user and tour
 reviewSchema.pre(/^find/, function (next) {
