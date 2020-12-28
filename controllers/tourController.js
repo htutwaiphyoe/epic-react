@@ -4,6 +4,7 @@
 const Tour = require("../models/tourModel");
 const catchError = require("../utils/catchError");
 const controllerFactory = require("../factory/controllerFactory");
+const AppError = require("../utils/AppError");
 
 exports.aliasTop5 = (req, res, next) => {
     req.query.sort = "-price,-ratingsAverage";
@@ -90,6 +91,26 @@ exports.getMonthlyPlan = catchError(async (req, res, next) => {
         results: plan.length,
         data: {
             plan,
+        },
+    });
+});
+
+exports.getToursWithIn = catchError(async (req, res, next) => {
+    const { distance, latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(",");
+    if (!lat || !lng) {
+        return next(new AppError("Missing latitude & longitude", 400));
+    }
+    const radius = unit === "mi" ? distance / 3963.2 : distance / 6378.1;
+    const tours = await Tour.find({
+        startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+    });
+
+    res.status(200).json({
+        status: "success",
+        results: tours.length,
+        data: {
+            data: tours,
         },
     });
 });
