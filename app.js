@@ -13,6 +13,7 @@ const hpp = require("hpp");
 const tourRouter = require("./routers/tourRouter");
 const userRouter = require("./routers/userRouter");
 const reviewRouter = require("./routers/reviewRouter");
+const viewRouter = require("./routers/viewRouter");
 
 const AppError = require("./utils/AppError");
 const globalErrorController = require("./controllers/errorController");
@@ -58,21 +59,8 @@ app.use(
 );
 
 // Routes Middleware
-app.get("/", (req, res) => {
-    res.status(200).render("base", {
-        title: "Exciting tours for adventurous people",
-    });
-});
-app.get("/overview", (req, res) => {
-    res.status(200).render("overview", {
-        title: "All Tours",
-    });
-});
-app.get("/tour", (req, res) => {
-    res.status(200).render("tour", {
-        title: "The Forest Hiker",
-    });
-});
+// website
+app.use("/", viewRouter);
 // api
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
