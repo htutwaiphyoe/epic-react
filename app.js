@@ -1,3 +1,5 @@
+// core modules
+const path = require("path");
 // third-party modules
 const express = require("express");
 const morgan = require("morgan");
@@ -18,6 +20,12 @@ const globalErrorController = require("./controllers/errorController");
 const app = express();
 
 // Middleware
+// template engine
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+
+// static file
+app.use(express.static(path.join(__dirname, "public")));
 // secure http headers
 app.use(helmet());
 // rate limiter
@@ -48,10 +56,12 @@ app.use(
         whitelist: ["duration", "ratingsAverage", "difficulty", "price", "maxGroupSize"],
     })
 );
-// static file
-app.use(express.static(`${__dirname}/public`));
 
 // Routes Middleware
+app.get("/", (req, res) => {
+    res.status(200).render("base");
+});
+// api
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/reviews", reviewRouter);
