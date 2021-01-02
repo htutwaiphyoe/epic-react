@@ -10,8 +10,12 @@ exports.getOverview = catchError(async (req, res) => {
     });
 });
 
-exports.getTourDetail = (req, res) => {
+exports.getTourDetail = catchError(async (req, res) => {
+    const { slug } = req.params;
+    const tour = await Tour.findOne({ slug }).populate("reviews");
+
     res.status(200).render("tour", {
-        title: "The Forest Hiker",
+        title: tour.name,
+        tour,
     });
-};
+});
