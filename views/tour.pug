@@ -1,5 +1,8 @@
 extends base
 
+block append head
+    
+
 include _reviewCard
 
 mixin overviewBox(icon, label, text)
@@ -61,7 +64,7 @@ block content
                 img.picture-box__img(src=`/img/tours/${image}`, alt=`${tour.name} Tour ${index + 1}`, class=`picture-box__img--${index + 1}`)
 
     section.section-map
-        #map
+        #map(data-locations=`${JSON.stringify(tour.locations)}`)
 
     section.section-reviews
         .reviews
