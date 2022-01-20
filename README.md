@@ -1,7 +1,3 @@
-# React Documentation
+# Epic React Course
 
-## Table of Contents
-
--   Installation
--   Main concepts
--   Advanced guides
+    By Kent.C.Dodds
