@@ -16,8 +16,9 @@
 - unpkg serves packages in npm as a static url
 - it creates global variables React and ReactDOM
 - React: responsible for creating React elements (kinda like
-  document.createElement()) -ReactDOM: responsible for rendering React elements
-  to the DOM (kinda like rootElement.append())
+  document.createElement())
+- ReactDOM: responsible for rendering React elements to the DOM (kinda like
+  rootElement.append())
 - React abstracts away imperative and gives declarative approach
 - separating packages for multiple platforms like ReactNative
 - for nested elements, React.createElement accepts multiple arguments (type,
