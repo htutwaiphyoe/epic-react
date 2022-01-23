@@ -27,13 +27,12 @@
     <title>Exercise 01 - React Fundamentals</title>
   </head>
   <body>
+    <div id="root"></div>
     <script type="module">
-      const rootElement = document.createElement('div')
-      rootElement.setAttribute('id', 'root')
+      const rootElement = document.getElementById('root')
       const helloWorldElement = document.createElement('div')
       helloWorldElement.innerHTML = 'Hello World'
       rootElement.append(helloWorldElement)
-      document.body.append(rootElement)
     </script>
   </body>
 </html>
