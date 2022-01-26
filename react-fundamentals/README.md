@@ -41,4 +41,7 @@
   script including compiled version
 - babel adds new script in HEAD element
 - use curly brace for dynamic Expressions
+- use spread operator for object to pass in JSX
 - [babel repl for JSX](https://babeljs.io/repl#?browsers=defaults%2C%20not%20ie%2011%2C%20not%20ie_mob%2011&build=&builtIns=App&corejs=3.6&spec=false&loose=false&code_lz=MYewdgzgLgBArgSxgXhgHgCYIG4D40QAOAhmLgBICmANtSGgPRGm7rNkDqIATtRo-3wMseAFBA&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=false&fileSize=false&timeTravel=false&sourceType=module&lineWrap=true&presets=react&prettier=true&targets=&version=7.17.5&externalPlugins=&assumptions=%7B%7D)
+- [react jsx](https://reactjs.org/docs/introducing-jsx.html)
+- [react spread attributes](https://reactjs.org/docs/jsx-in-depth.html#spread-attributes)
