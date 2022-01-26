@@ -28,8 +28,7 @@
   <script type="text/babel">
     const className = 'container'
     const children = 'Hello World'
-    const props = {className, children}
-    const element = <div {...props} />
+    const element = <div className={className}>{children}</div>
     ReactDOM.render(element, document.getElementById('root'))
   </script>
 </body>
