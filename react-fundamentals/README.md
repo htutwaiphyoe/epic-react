@@ -54,5 +54,13 @@
 - To reduce the duplication for creating the React elements
 - React.createElement() can accept first argument which is a type as a function
   which returns something that can render
-- Only React.createElement() elements include in React Dev Tools, function calls
-  are not included
+- If type is a function, it stores as a reference in type property
+- if createElement type is a function and when react renders DOM node for that,
+  it creates element in memory with function and call that function to get the
+  dom node that represents that elements
+- Only React.createElement() elements include in React Dev Tools, direct
+  function calls are not included
+- using jsx, babel needs to know to put function as a reference in element type.
+  if not it just adds in quotes
+- In jsx syntax specifications, for React components, it must start with Upper
+  case character and it will refer function
