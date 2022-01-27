@@ -52,3 +52,6 @@
 - Components are basically functions which return something that can render
   (more React elements (JSX), strings, null, numbers, etc.)
 - To reduce the duplication for creating the React elements
+- React.createElement() can accept first argument which is a type as a function
+  which returns something that can render
+- only components include in React Dev Tools, function calls are not included
