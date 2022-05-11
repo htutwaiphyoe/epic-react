@@ -22,3 +22,34 @@ create DOM programmatically rather than defining in html.
 [modules js](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)
 
 [modules js examples](https://github.com/mdn/js-examples/tree/master/modules)
+
+## 02. Introduction to Raw React API
+
+[react source code](https://github.com/facebook/react/blob/48907797294340b6d5d8fecfbcf97edf0691888d/packages/react-dom/src/client/ReactDOMComponent.js#L416)
+
+React abstracts the imperative browser API and gives a much declarative API
+
+[imperative vs declarative](https://ui.dev/imperative-vs-declarative-programming)
+
+React supports multiple platforms and each one has its own code and shared code
+between platforms.
+
+For web applications, two JavaScript files is needed.
+
+1. React => responsible for creating React elements (like
+   document.createElement())
+2. ReactDOM => responsible for rendering React elements to the DOM
+   (rootElement.append())
+
+To get React and ReactDOM library, use npm (package registry) or cdn (unpkg.com)
+
+[unpkg](https://unpkg.com/)
+
+after including script tags, React and ReactDOM are available as global
+variables due to UMD (universal module definition)
+
+In React.createElement, children can be properties of prop object or any number
+of additional parameters which is after second parameter. So, for multiple
+children, can use array or multiple parameters. if children is array, key is
+needed to provide, multiple parameters, no need to provide. if no props is
+needed, can give null

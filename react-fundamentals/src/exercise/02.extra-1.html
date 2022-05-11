@@ -1,0 +1,24 @@
+<html>
+  <body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18.1.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.1.0/umd/react-dom.development.js"></script>
+    <script type="module">
+      const rootElement = document.getElementById('root')
+      const helloElement = React.createElement('span', null, 'Hello')
+      const worldElement = React.createElement('span', {children: 'World'})
+      const containerElement = React.createElement(
+        'div',
+        {
+          // children: [helloElement, ' ', worldElement],
+          className: 'container',
+        },
+        helloElement,
+        '  ',
+        worldElement,
+      )
+      const root = ReactDOM.createRoot(rootElement)
+      root.render(containerElement)
+    </script>
+  </body>
+</html>
