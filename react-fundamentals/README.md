@@ -53,3 +53,39 @@ of additional parameters which is after second parameter. So, for multiple
 children, can use array or multiple parameters. if children is array, key is
 needed to provide, multiple parameters, no need to provide. if no props is
 needed, can give null
+
+## Using JSX
+
+JSX is html-like syntactic sugar on top of raw React API. It is easy to read,
+write and understand. It compiles to React raw api.
+
+JSX is not actually JavaScript, need to be used babel compiler, check in babel
+REPL for example
+
+[babel](https://babeljs.io/)
+
+[babel repl for jsx](https://babeljs.io/repl#?browsers=defaults%2C%20not%20ie%2011%2C%20not%20ie_mob%2011&build=&builtIns=App&corejs=3.21&spec=false&loose=false&code_lz=MYewdgzgLgBArgSxgXhgHgCYIG4D40QAOAhmLgBICmANtSGgPRGm7rNkDqIATtRo-3wMseAFBA&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=false&fileSize=false&timeTravel=false&sourceType=module&lineWrap=true&presets=react&prettier=true&targets=&version=7.17.11&externalPlugins=&assumptions=%7B%7D)
+
+Knowing JSX and its compiled version is good for reading and using it.
+
+since jsx also is not actually html, there are a few subtle differences for
+attributes. For eg, class in html, className in JSX
+
+[jsx vs html attributes](https://reactjs.org/docs/dom-elements.html#differences-in-attributes)
+
+Interpolation is defined as "the insertion of something of a different nature
+into something else."
+
+[jsx](https://reactjs.org/docs/introducing-jsx.html)
+
+if children are provided in props and children, it will show only one. if
+children are provided in props, it will be in props of React.createElement if
+children are provided in children, it will be third parameter of
+React.createElement
+
+text/babel means browser does not run that script but babel takes that and
+compiles and generates new script tag in the head tag which can be run by
+browser
+
+for passing props, order of props matters because of overwriting. Same props can
+be overwritten by latter.
