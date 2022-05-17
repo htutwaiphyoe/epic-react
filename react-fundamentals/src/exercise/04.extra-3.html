@@ -1,0 +1,45 @@
+<html>
+  <body>
+    <script src="https://unpkg.com/react@18.1.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.1.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.12.4/babel.js"></script>
+    <script type="text/babel">
+      function Message({greeting, subject}) {
+        return (
+          <div className="message">
+            {greeting}, {subject}
+          </div>
+        )
+      }
+
+      const PropTypes = {
+        string(props, propName, componentName) {
+          if (typeof props[propName] !== 'string') {
+            return new Error(
+              `${propName} should be a string but ${typeof props[
+                propName
+              ]} is provided.`,
+            )
+          }
+        },
+      }
+
+      Message.propTypes = {
+        greeting: PropTypes.string,
+        subject: PropTypes.string,
+      }
+
+      const helloElement = <Message greeting={1} subject="World!" />
+      const messageElement = <Message greeting="Goodbye" subject={false} />
+
+      const element = (
+        <div className="container">
+          {helloElement}
+          {messageElement}
+        </div>
+      )
+
+      ReactDOM.createRoot(document.getElementById('root')).render(element)
+    </script>
+  </body>
+</html>

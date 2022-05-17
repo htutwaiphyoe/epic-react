@@ -74,7 +74,7 @@ attributes. For eg, class in html, className in JSX
 [jsx vs html attributes](https://reactjs.org/docs/dom-elements.html#differences-in-attributes)
 
 Interpolation is defined as "the insertion of something of a different nature
-into something else."
+into something else." Interpolation only accepts expressions.
 
 [jsx](https://reactjs.org/docs/introducing-jsx.html)
 
@@ -89,3 +89,63 @@ browser
 
 for passing props, order of props matters because of overwriting. Same props can
 be overwritten by latter.
+
+[spread props](https://reactjs.org/docs/jsx-in-depth.html#spread-attributes)
+
+## Creating custom components
+
+To share and reuse JSX, functions are used. These functions are called
+"components" and they have special properties.
+
+Components are basically functions which return something that can render (React
+elements, strings, null, numbers, etc.)
+
+Reusing means reducing code duplication.
+
+[jsx in depth](https://reactjs.org/docs/jsx-in-depth.html)
+[what is jsx](https://kentcdodds.com/blog/what-is-jsx)
+
+The first argument to React.createElement can also be a function which returns
+something that can be rendered. It takes the function as the type
+
+React.createElement(type, props, children)
+
+The difference between React.createElement and regular function call is in the
+React dev tool React.createElement creates component for the function but
+regular function call does not.
+
+```js
+
+ui = <Capitalized /> // React.createElement(Capitalized)
+ui = <property.access /> // React.createElement(property.access)
+ui = <Property.Access /> // React.createElement(Property.Access)
+ui = <Property['Access'] /> // SyntaxError
+ui = <lowercase /> // React.createElement('lowercase')
+ui = <kebab-case /> // React.createElement('kebab-case')
+ui = <Upper-Kebab-Case /> // React.createElement('Upper-Kebab-Case')
+ui = <Upper_Snake_Case /> // React.createElement(Upper_Snake_Case)
+ui = <lower_snake_case /> // React.createElement('lower_snake_case')
+
+```
+
+To use functions as custom components, need to define function name to
+Capitalized for babel to passes the function as a reference rather than a string
+of its name
+
+if capital letter in jsx, it is the reference in its scope.
+
+what if prop is a string but a number is provided or prop is not provided, to
+check and validate, PropTypes is used. It will show some indications for props
+which are not passed correct values. PropTypes run for each props for a
+component (function), it will be slow performance, so in production, it will be
+dropped
+
+[typechecking with proptypes](https://reactjs.org/docs/typechecking-with-proptypes.html)
+
+React team create a package of prop-types.
+
+[npm proptypes](https://github.com/facebook/prop-types)
+
+jsx element must have one parent element but if you don't wanna add use
+React.Fragment or <> can be used to render elements side by side without nesting
+under root element.
