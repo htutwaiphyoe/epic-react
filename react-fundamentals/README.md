@@ -149,3 +149,38 @@ React team create a package of prop-types.
 jsx element must have one parent element but if you don't wanna add use
 React.Fragment or <> can be used to render elements side by side without nesting
 under root element.
+
+## Styling
+
+Two ways to style react components
+
+1. Inline style with style prop
+2. Regular CSS with className prop
+
+Inline style
+
+In html => string of css, kebab-cased notation
+
+In react => object of css, camelCased notation
+
+style property of DOM nodes => CSSStyleDeclaration
+
+class property of DOM nodes => className
+
+html attributes and dom properties are not the same.
+
+JSX follows property name of DOM node.
+
+DOM property means dom element property like
+document.getElementById('item').classList, style, className
+
+[CSSStyleDeclaration](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleDeclaration)
+
+[dom properties](https://www.w3schools.com/jsref/dom_obj_all.asp)
+
+To avoid undefined, set default value to property
+
+the user of component should pass props which are not depend on implementation
+details of component.
+
+it is program to interface, not implementation

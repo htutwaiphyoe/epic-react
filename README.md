@@ -10,5 +10,6 @@
 
    - Basic JavaScript-rendered Hello World
    - Intro to raw React APIs
-   - JSX
+   - Using JSX
    - Creating custom Component
+   - Styling
