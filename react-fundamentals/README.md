@@ -184,3 +184,54 @@ the user of component should pass props which are not depend on implementation
 details of component.
 
 it is program to interface, not implementation
+
+## Form
+
+[preventDefault](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault)
+
+browser by default makes a get request to current url with the values of the
+form as query parameters in url, that's why full page refresh happened when
+submit the form, query parameters are name and value of the input, that's why
+name is required, for SPA, it is unwanted behavior
+
+e.preventDefault() is disable default behavior of form submit event which is a
+page refresh
+
+events from React **Synthetic Events** which are not real browser events. It is
+the object that react creates for us that looks and behaves exactly like regular
+browser events. It is for performance reasons, event delegation. To access
+native event, event.nativeEvent
+
+for form submit, use onSubmit event, this event has target which is a reference
+of the form DOM and also has references to the form input elements.
+
+use console.dir to get the property list of DOM node
+![console.dir](https://developer.mozilla.org/en-US/docs/Web/API/console/dir)
+
+to get input values in the form, there are two ways,
+
+1. accessing with indexes => event.target.elements[index].value
+2. accessing with name attribute => event.target.elements.elementName.value
+
+adding htmlFor in label and id in form input is good for screen readers
+
+In React, the value can be accessed via a ref. A ref is an object that stays
+consistent between renders of your React component. It has a current property on
+it which can be updated to any value at any time. In the case of interacting
+with DOM nodes, a ref can be passed to a React element and React will set the
+current property to the DOM node that’s rendered. To create a ref, use
+React.useRef and to access the value, use ref.current.value
+
+In React, to create and control the status, use useState hook. React.useState
+accepts a default initial value and returns an array (the current state and a
+state updater function).
+
+To control input value, add value in input
+
+inputNode.value = 'whatever' => imperative
+
+value={state} => React
+
+if value prop is provided, provide onChange handler so that the value is updated
+
+to give default value, use defaultValue prop
