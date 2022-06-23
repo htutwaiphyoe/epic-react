@@ -222,6 +222,9 @@ with DOM nodes, a ref can be passed to a React element and React will set the
 current property to the DOM node that’s rendered. To create a ref, use
 React.useRef and to access the value, use ref.current.value
 
+![useRef react](https://reactjs.org/docs/hooks-reference.html#useref)
+![useState react](https://reactjs.org/docs/hooks-state.html)
+
 In React, to create and control the status, use useState hook. React.useState
 accepts a default initial value and returns an array (the current state and a
 state updater function).
@@ -235,3 +238,22 @@ value={state} => React
 if value prop is provided, provide onChange handler so that the value is updated
 
 to give default value, use defaultValue prop
+
+## Rendering Arrays
+
+React needs a key prop when an array is rendered
+
+If an item is added in the list, React doesn’t really know whether an item is
+added in the middle, beginning, or end. And the same goes for when an item is
+removed (it doesn’t know whether that happened in the middle, beginning, or end
+either).
+
+If any of those React elements represent a component that is maintaining state,
+that can be pretty problematic.
+
+React is trying to compare the before and after with no knowledge of how the
+elements got from one position to another.
+
+giving index as key is also like default behavior
+
+Always pass unique id to the key props
