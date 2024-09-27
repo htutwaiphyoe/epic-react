@@ -1,15 +1,3 @@
-# Epic React Dev
+# Epic React
 
     Course by Kent.C.Dodds
-
-## Table of Contents
-
-1. welcome
-
-2. react-fundamentals
-
-   - Basic JavaScript-rendered Hello World
-   - Intro to raw React APIs
-   - Using JSX
-   - Creating custom Component
-   - Styling
