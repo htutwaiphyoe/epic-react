@@ -1,6 +1,5 @@
 # Kawi Frontend — Design
 
-**Date:** 2026-07-29
 **Status:** Approved for planning
 
 ## Purpose
