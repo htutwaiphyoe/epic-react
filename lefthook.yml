@@ -1,6 +1,3 @@
-# Git hooks. Installed via `bunx lefthook install` (run automatically by `bun install`).
-# Docs: https://lefthook.dev/configuration/
-
 pre-commit:
   parallel: true
   jobs:
