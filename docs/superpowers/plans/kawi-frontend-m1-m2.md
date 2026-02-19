@@ -1391,10 +1391,12 @@ bun run dev
 Visit `/books`. Then confirm SSR is real:
 
 ```bash
-curl -s http://localhost:3000/books | grep -c "rounded-lg border p-4"
+curl -s http://localhost:3000/books | grep -ac "rounded-lg border p-4"
 ```
 
 Expected: a non-zero count — the cards are in the server-rendered HTML, not injected by JS. Also click through pagination and change sort, confirming the URL updates and results change.
+
+⚠️ **The `-a` flag is required.** In dev mode the SSR response contains a null byte, so plain `grep` treats the page as binary and prints nothing at all — indistinguishable from "no matches" on a page that is actually working.
 
 - [ ] **Step 7: Commit**
 
