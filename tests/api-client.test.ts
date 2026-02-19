@@ -1,26 +1,28 @@
+import axios, { AxiosError, AxiosHeaders } from "axios";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiClientError, requestApi } from "#/server/api-client";
+import {
+	ApiClientError,
+	REQUEST_TIMEOUT_MS,
+	requestApi,
+} from "#/server/api-client";
 
-const jsonResponse = (status: number, body: unknown) =>
-	new Response(JSON.stringify(body), {
+const stubRequest = (data: unknown) =>
+	vi.spyOn(axios, "request").mockResolvedValue({ status: 200, data });
+
+const configOf = (spy: ReturnType<typeof stubRequest>) =>
+	spy.mock.calls[0]?.[0] ?? {};
+
+const axiosErrorWithResponse = (status: number, data: unknown) => {
+	const error = new AxiosError("failed", "ERR_BAD_REQUEST");
+	error.response = {
 		status,
-		headers: { "content-type": "application/json" },
-	});
-
-const firstCall = (mock: ReturnType<typeof vi.spyOn>) => {
-	const call = mock.mock.calls[0] ?? [];
-	return {
-		url: String(call[0]),
-		init: (call[1] ?? {}) as RequestInit,
+		data,
+		statusText: "",
+		headers: new AxiosHeaders(),
+		config: { headers: new AxiosHeaders() },
 	};
+	return error;
 };
-
-const stubFetch = (status: number, body: unknown) =>
-	vi
-		.spyOn(globalThis, "fetch")
-		.mockResolvedValue(jsonResponse(status, body)) as ReturnType<
-		typeof vi.spyOn
-	>;
 
 describe("requestApi", () => {
 	beforeEach(() => {
@@ -33,46 +35,52 @@ describe("requestApi", () => {
 		vi.restoreAllMocks();
 	});
 
-	it("prefixes the API base URL and the /api/v1 namespace", async () => {
-		const mock = stubFetch(200, { status: "success", books: [] });
+	it("sets the base URL to the API's versioned namespace", async () => {
+		const spy = stubRequest({ status: "success", books: [] });
 
 		await requestApi("/books");
 
-		expect(firstCall(mock).url).toBe("http://api.test/api/v1/books");
+		const config = configOf(spy);
+		expect(config.baseURL).toBe("http://api.test/api/v1");
+		expect(config.url).toBe("/books");
 	});
 
-	it("serializes query params and omits undefined values", async () => {
-		const mock = stubFetch(200, { status: "success", books: [] });
+	it("passes query params through, dropping undefined values", async () => {
+		const spy = stubRequest({ status: "success", books: [] });
 
 		await requestApi("/books", {
 			query: { page: 2, search: undefined, limit: 20 },
 		});
 
-		expect(firstCall(mock).url).toBe(
-			"http://api.test/api/v1/books?page=2&limit=20",
-		);
+		expect(configOf(spy).params).toEqual({ page: 2, limit: 20 });
 	});
 
-	it("attaches a bearer token when given one", async () => {
-		const mock = stubFetch(200, { status: "success" });
-
-		await requestApi("/users/me", { accessToken: "tok123" });
-
-		const headers = new Headers(firstCall(mock).init.headers);
-		expect(headers.get("authorization")).toBe("Bearer tok123");
-	});
-
-	it("sends no authorization header without a token", async () => {
-		const mock = stubFetch(200, { status: "success" });
+	it("applies a request timeout", async () => {
+		const spy = stubRequest({ status: "success" });
 
 		await requestApi("/books");
 
-		const headers = new Headers(firstCall(mock).init.headers);
-		expect(headers.has("authorization")).toBe(false);
+		expect(configOf(spy).timeout).toBe(REQUEST_TIMEOUT_MS);
 	});
 
-	it("returns the parsed body on success", async () => {
-		stubFetch(200, {
+	it("attaches a bearer token when given one", async () => {
+		const spy = stubRequest({ status: "success" });
+
+		await requestApi("/users/me", { accessToken: "tok123" });
+
+		expect(configOf(spy).headers?.authorization).toBe("Bearer tok123");
+	});
+
+	it("sends no authorization header without a token", async () => {
+		const spy = stubRequest({ status: "success" });
+
+		await requestApi("/books");
+
+		expect(configOf(spy).headers?.authorization).toBeUndefined();
+	});
+
+	it("returns the response body on success", async () => {
+		stubRequest({
 			status: "success",
 			book: { id: "b1", title: "Zurich 1953" },
 		});
@@ -85,7 +93,12 @@ describe("requestApi", () => {
 	});
 
 	it("throws a normalized ApiClientError on an error status", async () => {
-		stubFetch(404, { status: "error", message: "Book is not found." });
+		vi.spyOn(axios, "request").mockRejectedValue(
+			axiosErrorWithResponse(404, {
+				status: "error",
+				message: "Book is not found.",
+			}),
+		);
 
 		await expect(requestApi("/books/missing")).rejects.toMatchObject({
 			status: 404,
@@ -93,27 +106,57 @@ describe("requestApi", () => {
 		});
 	});
 
-	it("throws ApiClientError with status 0 when the network fails", async () => {
-		vi.spyOn(globalThis, "fetch").mockRejectedValue(
-			new TypeError("fetch failed"),
+	it("maps a validation error into fieldErrors", async () => {
+		vi.spyOn(axios, "request").mockRejectedValue(
+			axiosErrorWithResponse(400, {
+				status: "error",
+				message: "Invalid request data.",
+				errors: [{ path: "sortBy", message: "Invalid option" }],
+			}),
 		);
 
-		const error = await requestApi("/books").catch((e: unknown) => e);
+		const error = (await requestApi("/books").catch(
+			(e: unknown) => e,
+		)) as ApiClientError;
 
-		expect(error).toBeInstanceOf(ApiClientError);
-		expect((error as ApiClientError).status).toBe(0);
+		expect(error.status).toBe(400);
+		expect(error.fieldErrors).toEqual({ sortBy: "Invalid option" });
 	});
 
-	it("sends a JSON body and content-type for POST", async () => {
-		const mock = stubFetch(201, { status: "success" });
+	it("throws ApiClientError with status 0 when the network fails", async () => {
+		vi.spyOn(axios, "request").mockRejectedValue(
+			new AxiosError("Network Error", "ERR_NETWORK"),
+		);
+
+		const error = (await requestApi("/books").catch(
+			(e: unknown) => e,
+		)) as ApiClientError;
+
+		expect(error).toBeInstanceOf(ApiClientError);
+		expect(error.status).toBe(0);
+	});
+
+	it("throws ApiClientError with status 0 when the request times out", async () => {
+		vi.spyOn(axios, "request").mockRejectedValue(
+			new AxiosError("timeout of 10000ms exceeded", "ECONNABORTED"),
+		);
+
+		const error = (await requestApi("/books").catch(
+			(e: unknown) => e,
+		)) as ApiClientError;
+
+		expect(error).toBeInstanceOf(ApiClientError);
+		expect(error.status).toBe(0);
+	});
+
+	it("sends the method, body and content-type for POST", async () => {
+		const spy = stubRequest({ status: "success" });
 
 		await requestApi("/orders", { method: "POST", body: { items: [] } });
 
-		const { init } = firstCall(mock);
-		expect(init.method).toBe("POST");
-		expect(init.body).toBe(JSON.stringify({ items: [] }));
-		expect(new Headers(init.headers).get("content-type")).toBe(
-			"application/json",
-		);
+		const config = configOf(spy);
+		expect(config.method).toBe("POST");
+		expect(config.data).toEqual({ items: [] });
+		expect(config.headers?.["content-type"]).toBe("application/json");
 	});
 });
