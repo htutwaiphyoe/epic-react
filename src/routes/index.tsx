@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BookGrid } from "@/features/books/BookGrid";
-import { getBooksFn } from "@/server/books.server";
+import { getBooksFn } from "@/server/books";
 
 export const Route = createFileRoute("/")({
 	ssr: true,

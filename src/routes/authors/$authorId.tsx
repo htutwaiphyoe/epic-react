@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { BookGrid } from "@/features/books/BookGrid";
 import { Pagination } from "@/features/shared/Pagination";
 import { booksSearchSchema } from "@/schemas/catalog";
-import { getAuthorFn } from "@/server/authors.server";
-import { getBooksByAuthorFn } from "@/server/books.server";
+import { getAuthorFn } from "@/server/authors";
+import { getBooksByAuthorFn } from "@/server/books";
 
 export const Route = createFileRoute("/authors/$authorId")({
 	ssr: true,

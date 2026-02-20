@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { formatMoney, formatRating } from "@/lib/money";
-import { getBookFn } from "@/server/books.server";
+import { getBookFn } from "@/server/books";
 
 export const Route = createFileRoute("/books/$bookId")({
 	ssr: true,

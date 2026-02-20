@@ -4,7 +4,7 @@ import { Pagination } from "@/features/shared/Pagination";
 import type { SortOption } from "@/features/shared/SortSelect";
 import { SortSelect } from "@/features/shared/SortSelect";
 import { type BooksSearch, booksSearchSchema } from "@/schemas/catalog";
-import { getBooksFn } from "@/server/books.server";
+import { getBooksFn } from "@/server/books";
 
 const SORT_OPTIONS: readonly SortOption<BooksSearch["sortBy"]>[] = [
 	{ value: "createdAt", label: "Newest" },

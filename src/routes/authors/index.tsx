@@ -3,7 +3,7 @@ import { Pagination } from "@/features/shared/Pagination";
 import type { SortOption } from "@/features/shared/SortSelect";
 import { SortSelect } from "@/features/shared/SortSelect";
 import { type AuthorsSearch, authorsSearchSchema } from "@/schemas/catalog";
-import { getAuthorsFn } from "@/server/authors.server";
+import { getAuthorsFn } from "@/server/authors";
 
 const SORT_OPTIONS: readonly SortOption<AuthorsSearch["sortBy"]>[] = [
 	{ value: "createdAt", label: "Newest" },
