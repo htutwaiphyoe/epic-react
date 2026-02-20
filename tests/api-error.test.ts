@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ApiClientError, normalizeApiError } from "#/server/api-error";
+import { ApiClientError, normalizeApiError } from "@/server/api-error";
 
 describe("normalizeApiError", () => {
 	it("normalizes an ApiError body", () => {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getEnv } from "#/env";
+import { getEnv } from "@/env";
 import { ApiClientError, normalizeApiError } from "./api-error";
 
 export { ApiClientError, normalizeApiError };

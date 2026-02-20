@@ -4,7 +4,7 @@ import {
 	ApiClientError,
 	REQUEST_TIMEOUT_MS,
 	requestApi,
-} from "#/server/api-client";
+} from "@/server/api-client";
 
 const stubRequest = (data: unknown) =>
 	vi.spyOn(axios, "request").mockResolvedValue({ status: 200, data });

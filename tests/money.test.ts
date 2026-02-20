@@ -4,7 +4,7 @@ import {
 	formatRating,
 	multiplyMoney,
 	sumMoney,
-} from "#/lib/money";
+} from "@/lib/money";
 
 describe("formatMoney", () => {
 	it("formats a decimal string as USD", () => {
