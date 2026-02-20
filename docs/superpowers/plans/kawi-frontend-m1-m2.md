@@ -45,8 +45,15 @@ Both variables are required — setting only `GIT_AUTHOR_DATE` leaves the commit
 | `src/server/api-error.ts` | `ApiClientError` + normalization of the backend's three error shapes |
 | `src/server/api-client.ts` | **Only** module that knows the API base URL; fetch + envelope unwrap |
 | `src/server/types.ts` | TypeScript types mirroring backend resources |
-| `src/server/books.server.ts` | `getBooksFn`, `getBookFn` server functions |
-| `src/server/authors.server.ts` | `getAuthorsFn`, `getAuthorFn` server functions |
+| `src/server/books.ts` | `getBooksFn`, `getBookFn` server functions |
+| `src/server/authors.ts` | `getAuthorsFn`, `getAuthorFn` server functions |
+
+⚠️ **Do not name these `*.server.ts`.** TanStack Start treats that suffix as
+server-only and blocks client imports, replacing the module with a mock. The
+client *must* import a `createServerFn` module to get its RPC stub. With the
+suffix, SSR works but client-side navigation silently returns a mock function
+instead of data — pagination renders `Page of · total` and detail pages render
+nothing. See `Note.md`.
 | `src/schemas/catalog.ts` | Zod schemas for list search params (shared by routes + server fns) |
 | `src/lib/money.ts` | Formats decimal-string money without floats |
 | `src/components/layout/Header.tsx` | Storefront header: brand, nav, search box |
