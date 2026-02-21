@@ -1,13 +1,17 @@
 import { defineConfig } from "@playwright/test";
 
+const PORT = 4173;
+const baseURL = `http://localhost:${PORT}`;
+
 export default defineConfig({
 	testDir: "./e2e",
 	forbidOnly: !!process.env.CI,
-	use: { baseURL: "http://localhost:3000" },
+	expect: { timeout: 10_000 },
+	use: { baseURL },
 	webServer: {
-		command: "bun run dev",
-		url: "http://localhost:3000",
-		reuseExistingServer: !process.env.CI,
-		timeout: 120_000,
+		command: `bun run build && bun run preview --port ${PORT}`,
+		url: baseURL,
+		reuseExistingServer: false,
+		timeout: 180_000,
 	},
 });
