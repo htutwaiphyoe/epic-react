@@ -8,6 +8,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { getSessionUserFn } from "@/server/auth";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -20,6 +21,7 @@ export const Route = createRootRoute({
 		],
 		links: [{ rel: "stylesheet", href: appCss }],
 	}),
+	loader: () => getSessionUserFn(),
 	shellComponent: RootDocument,
 	component: RootLayout,
 	errorComponent: ({ error }) => (
@@ -40,10 +42,16 @@ export const Route = createRootRoute({
 	),
 });
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({
+	children,
+	user,
+}: {
+	children: React.ReactNode;
+	user?: { name: string } | null;
+}) {
 	return (
 		<div className="flex min-h-screen flex-col">
-			<Header />
+			<Header user={user ?? null} />
 			<main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
 				{children}
 			</main>
@@ -53,8 +61,10 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function RootLayout() {
+	const user = Route.useLoaderData();
+
 	return (
-		<Shell>
+		<Shell user={user}>
 			<Outlet />
 		</Shell>
 	);
@@ -68,15 +78,17 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				{children}
-				<TanStackDevtools
-					config={{ position: "bottom-right" }}
-					plugins={[
-						{
-							name: "Tanstack Router",
-							render: <TanStackRouterDevtoolsPanel />,
-						},
-					]}
-				/>
+				{import.meta.env.DEV ? (
+					<TanStackDevtools
+						config={{ position: "bottom-right" }}
+						plugins={[
+							{
+								name: "Tanstack Router",
+								render: <TanStackRouterDevtoolsPanel />,
+							},
+						]}
+					/>
+				) : null}
 				<Scripts />
 			</body>
 		</html>
