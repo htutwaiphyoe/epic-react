@@ -167,3 +167,91 @@ The API has no cart resource — `POST /api/v1/orders` takes the complete item
 list in one call. The cart is therefore `localStorage` state that only becomes
 server state at checkout. A real `carts` resource is planned, so the checkout
 boundary should stay narrow enough to swap it in without touching components.
+
+## Refresh is single-flight, keyed per refresh token
+
+Server functions run in one long-lived process shared by every visitor, so a
+module-level `refreshPromise` would be shared across users: B hitting a 401
+while A's refresh is in flight would await A's promise and receive **A's
+tokens**.
+
+Keying by the presented refresh token gives the right granularity — two
+concurrent requests from one browser share a token and therefore one refresh,
+while different users never collide. `refresh-coordinator.ts` is deliberately
+free of session and HTTP knowledge so this can be tested exhaustively.
+
+It matters because the backend implements reuse detection: presenting an
+already-rotated refresh token revokes the user's entire token family. Two
+parallel refreshes would sign them out.
+
+## Which layer knows what
+
+- `api-client.ts` — transport only. Takes an optional access token, knows
+  nothing about sessions.
+- `authed.ts` — session-aware. Attaches the token, refreshes once on 401,
+  retries, and clears the session if that still fails.
+- `session.ts` — the only module that touches the cookie.
+
+`requestApi` was left untouched when auth landed, which is why its tests still
+hold. `/account` fetches its profile through `authedRequest` rather than
+reading the cookie, so the stored access token is proven to work against the
+backend rather than merely being stored.
+
+## Logout is deliberately forgiving
+
+`logoutFn` swallows a failing backend logout. If the refresh token is already
+revoked or expired the API call fails, but the local session must still be
+cleared — otherwise a user with a stale session can never sign out.
+
+## The header costs a cookie read, not an API call
+
+`loginFn` stores the user in the session, so `getSessionUserFn` decrypts the
+cookie and returns. The root loader calls it on every navigation; that is not a
+request to the backend.
+
+## Run e2e against a production build, not the dev server
+
+This cost several hours of chasing phantom failures. In dev, Vite compiles
+client route chunks **on demand**, so the first client-side navigation to a
+given route can take longer than any reasonable assertion timeout. Tests failed
+at 15s, passed at 881ms once the route was warm, and which tests failed moved
+around between runs.
+
+Warming routes over HTTP does not fix it — that only compiles the SSR side, not
+the client chunks a client-side navigation needs. A `globalSetup` that warms is
+worse than useless, because Playwright runs `globalSetup` *before* it starts
+`webServer`, so the fetches hit nothing and fail silently.
+
+`playwright.config.ts` therefore builds and serves the production bundle on
+port 4173. Nothing compiles on demand, the suite runs in ~6 seconds, and it
+passes deterministically. The build takes about 200ms, so this costs nothing.
+
+## The router devtools pollute accessibility locators
+
+`getByLabel("Password")` resolved to three elements: the password input, plus
+two devtools entries with `aria-label="Open match details for
+/forgot-password"` and `.../reset-password`. `getByLabel` matches substrings,
+and the devtools registers those entries only once the router has preloaded
+those routes — so the failure was timing-dependent.
+
+Two fixes, both worth having. `TanStackDevtools` is now gated behind
+`import.meta.env.DEV`, which also stops it shipping in production builds where
+it was previously unconditional. And auth locators use `{ exact: true }`.
+
+The earlier stray `<h3>` that forced card selectors to be scoped to
+`a[href^='/books/'] h3` was the same phenomenon.
+
+## Biome rejects TanStack Form's documented children prop
+
+`<form.Field children={(field) => …} />` is how the docs show it, but Biome's
+`lint/correctness/noChildrenProp` rejects passing children as a prop. Use JSX
+children instead — `<form.Field …>{(field) => …}</form.Field>` — which is
+equivalent and lint-clean.
+
+## The auth rate limiter constrains the e2e suite
+
+`authLimiter` allows 10 requests per 15 minutes per IP on `/api/v1/auth`, and
+the auth suite makes roughly six. Two runs inside one window start returning
+429, which surfaces as an error banner and an unchanged URL rather than
+anything mentioning rate limits. Restart the backend to clear the in-memory
+counter: `docker restart kawi-backend-app-1`.
