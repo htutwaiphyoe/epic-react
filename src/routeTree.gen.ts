@@ -11,15 +11,29 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
+import { Route as AuthedCartRouteImport } from './routes/_authed/cart'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AuthorsIndexRouteImport } from './routes/authors/index'
 import { Route as AuthorsAuthorIdRouteImport } from './routes/authors/$authorId'
 import { Route as BooksIndexRouteImport } from './routes/books/index'
 import { Route as BooksBookIdRouteImport } from './routes/books/$bookId'
+import { Route as AuthedAccountIndexRouteImport } from './routes/_authed/account/index'
+import { Route as AdminAuthorsIndexRouteImport } from './routes/admin/authors/index'
+import { Route as AdminAuthorsAuthorIdRouteImport } from './routes/admin/authors/$authorId'
+import { Route as AdminAuthorsNewRouteImport } from './routes/admin/authors/new'
+import { Route as AdminBooksIndexRouteImport } from './routes/admin/books/index'
+import { Route as AdminBooksBookIdRouteImport } from './routes/admin/books/$bookId'
+import { Route as AdminBooksNewRouteImport } from './routes/admin/books/new'
+import { Route as AdminOrdersIndexRouteImport } from './routes/admin/orders/index'
+import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin/orders/$orderId'
+import { Route as AdminReviewsIndexRouteImport } from './routes/admin/reviews/index'
+import { Route as AuthedAccountOrdersIndexRouteImport } from './routes/_authed/account/orders/index'
+import { Route as AuthedAccountOrdersOrderIdRouteImport } from './routes/_authed/account/orders/$orderId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -50,10 +69,15 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedAccountRoute = AuthedAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
+const AuthedCartRoute = AuthedCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => AuthedRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AuthorsIndexRoute = AuthorsIndexRouteImport.update({
   id: '/authors/',
@@ -75,18 +99,94 @@ const BooksBookIdRoute = BooksBookIdRouteImport.update({
   path: '/books/$bookId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedAccountIndexRoute = AuthedAccountIndexRouteImport.update({
+  id: '/account/',
+  path: '/account/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AdminAuthorsIndexRoute = AdminAuthorsIndexRouteImport.update({
+  id: '/authors/',
+  path: '/authors/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuthorsAuthorIdRoute = AdminAuthorsAuthorIdRouteImport.update({
+  id: '/authors/$authorId',
+  path: '/authors/$authorId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuthorsNewRoute = AdminAuthorsNewRouteImport.update({
+  id: '/authors/new',
+  path: '/authors/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBooksIndexRoute = AdminBooksIndexRouteImport.update({
+  id: '/books/',
+  path: '/books/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBooksBookIdRoute = AdminBooksBookIdRouteImport.update({
+  id: '/books/$bookId',
+  path: '/books/$bookId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBooksNewRoute = AdminBooksNewRouteImport.update({
+  id: '/books/new',
+  path: '/books/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReviewsIndexRoute = AdminReviewsIndexRouteImport.update({
+  id: '/reviews/',
+  path: '/reviews/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AuthedAccountOrdersIndexRoute =
+  AuthedAccountOrdersIndexRouteImport.update({
+    id: '/account/orders/',
+    path: '/account/orders/',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedAccountOrdersOrderIdRoute =
+  AuthedAccountOrdersOrderIdRouteImport.update({
+    id: '/account/orders/$orderId',
+    path: '/account/orders/$orderId',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/account': typeof AuthedAccountRoute
+  '/cart': typeof AuthedCartRoute
   '/authors/$authorId': typeof AuthorsAuthorIdRoute
   '/books/$bookId': typeof BooksBookIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/authors/': typeof AuthorsIndexRoute
   '/books/': typeof BooksIndexRoute
+  '/admin/authors/$authorId': typeof AdminAuthorsAuthorIdRoute
+  '/admin/authors/new': typeof AdminAuthorsNewRoute
+  '/admin/books/$bookId': typeof AdminBooksBookIdRoute
+  '/admin/books/new': typeof AdminBooksNewRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
+  '/account/': typeof AuthedAccountIndexRoute
+  '/admin/authors/': typeof AdminAuthorsIndexRoute
+  '/admin/books/': typeof AdminBooksIndexRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
+  '/admin/reviews/': typeof AdminReviewsIndexRoute
+  '/account/orders/$orderId': typeof AuthedAccountOrdersOrderIdRoute
+  '/account/orders/': typeof AuthedAccountOrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -94,39 +194,80 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/account': typeof AuthedAccountRoute
+  '/cart': typeof AuthedCartRoute
   '/authors/$authorId': typeof AuthorsAuthorIdRoute
   '/books/$bookId': typeof BooksBookIdRoute
+  '/admin': typeof AdminIndexRoute
   '/authors': typeof AuthorsIndexRoute
   '/books': typeof BooksIndexRoute
+  '/admin/authors/$authorId': typeof AdminAuthorsAuthorIdRoute
+  '/admin/authors/new': typeof AdminAuthorsNewRoute
+  '/admin/books/$bookId': typeof AdminBooksBookIdRoute
+  '/admin/books/new': typeof AdminBooksNewRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
+  '/account': typeof AuthedAccountIndexRoute
+  '/admin/authors': typeof AdminAuthorsIndexRoute
+  '/admin/books': typeof AdminBooksIndexRoute
+  '/admin/orders': typeof AdminOrdersIndexRoute
+  '/admin/reviews': typeof AdminReviewsIndexRoute
+  '/account/orders/$orderId': typeof AuthedAccountOrdersOrderIdRoute
+  '/account/orders': typeof AuthedAccountOrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/_authed/account': typeof AuthedAccountRoute
+  '/_authed/cart': typeof AuthedCartRoute
   '/authors/$authorId': typeof AuthorsAuthorIdRoute
   '/books/$bookId': typeof BooksBookIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/authors/': typeof AuthorsIndexRoute
   '/books/': typeof BooksIndexRoute
+  '/admin/authors/$authorId': typeof AdminAuthorsAuthorIdRoute
+  '/admin/authors/new': typeof AdminAuthorsNewRoute
+  '/admin/books/$bookId': typeof AdminBooksBookIdRoute
+  '/admin/books/new': typeof AdminBooksNewRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
+  '/_authed/account/': typeof AuthedAccountIndexRoute
+  '/admin/authors/': typeof AdminAuthorsIndexRoute
+  '/admin/books/': typeof AdminBooksIndexRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
+  '/admin/reviews/': typeof AdminReviewsIndexRoute
+  '/_authed/account/orders/$orderId': typeof AuthedAccountOrdersOrderIdRoute
+  '/_authed/account/orders/': typeof AuthedAccountOrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
-    | '/account'
+    | '/cart'
     | '/authors/$authorId'
     | '/books/$bookId'
+    | '/admin/'
     | '/authors/'
     | '/books/'
+    | '/admin/authors/$authorId'
+    | '/admin/authors/new'
+    | '/admin/books/$bookId'
+    | '/admin/books/new'
+    | '/admin/orders/$orderId'
+    | '/account/'
+    | '/admin/authors/'
+    | '/admin/books/'
+    | '/admin/orders/'
+    | '/admin/reviews/'
+    | '/account/orders/$orderId'
+    | '/account/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -134,29 +275,57 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/signup'
-    | '/account'
+    | '/cart'
     | '/authors/$authorId'
     | '/books/$bookId'
+    | '/admin'
     | '/authors'
     | '/books'
+    | '/admin/authors/$authorId'
+    | '/admin/authors/new'
+    | '/admin/books/$bookId'
+    | '/admin/books/new'
+    | '/admin/orders/$orderId'
+    | '/account'
+    | '/admin/authors'
+    | '/admin/books'
+    | '/admin/orders'
+    | '/admin/reviews'
+    | '/account/orders/$orderId'
+    | '/account/orders'
   id:
     | '__root__'
     | '/'
     | '/_authed'
+    | '/admin'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
-    | '/_authed/account'
+    | '/_authed/cart'
     | '/authors/$authorId'
     | '/books/$bookId'
+    | '/admin/'
     | '/authors/'
     | '/books/'
+    | '/admin/authors/$authorId'
+    | '/admin/authors/new'
+    | '/admin/books/$bookId'
+    | '/admin/books/new'
+    | '/admin/orders/$orderId'
+    | '/_authed/account/'
+    | '/admin/authors/'
+    | '/admin/books/'
+    | '/admin/orders/'
+    | '/admin/reviews/'
+    | '/_authed/account/orders/$orderId'
+    | '/_authed/account/orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -181,6 +350,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -211,12 +387,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/account': {
-      id: '/_authed/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof AuthedAccountRouteImport
+    '/_authed/cart': {
+      id: '/_authed/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof AuthedCartRouteImport
       parentRoute: typeof AuthedRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/authors/': {
       id: '/authors/'
@@ -246,23 +429,142 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BooksBookIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/account/': {
+      id: '/_authed/account/'
+      path: '/account'
+      fullPath: '/account/'
+      preLoaderRoute: typeof AuthedAccountIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/admin/authors/': {
+      id: '/admin/authors/'
+      path: '/authors'
+      fullPath: '/admin/authors/'
+      preLoaderRoute: typeof AdminAuthorsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/authors/$authorId': {
+      id: '/admin/authors/$authorId'
+      path: '/authors/$authorId'
+      fullPath: '/admin/authors/$authorId'
+      preLoaderRoute: typeof AdminAuthorsAuthorIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/authors/new': {
+      id: '/admin/authors/new'
+      path: '/authors/new'
+      fullPath: '/admin/authors/new'
+      preLoaderRoute: typeof AdminAuthorsNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/books/': {
+      id: '/admin/books/'
+      path: '/books'
+      fullPath: '/admin/books/'
+      preLoaderRoute: typeof AdminBooksIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/books/$bookId': {
+      id: '/admin/books/$bookId'
+      path: '/books/$bookId'
+      fullPath: '/admin/books/$bookId'
+      preLoaderRoute: typeof AdminBooksBookIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/books/new': {
+      id: '/admin/books/new'
+      path: '/books/new'
+      fullPath: '/admin/books/new'
+      preLoaderRoute: typeof AdminBooksNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders/': {
+      id: '/admin/orders/'
+      path: '/orders'
+      fullPath: '/admin/orders/'
+      preLoaderRoute: typeof AdminOrdersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders/$orderId': {
+      id: '/admin/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/admin/orders/$orderId'
+      preLoaderRoute: typeof AdminOrdersOrderIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reviews/': {
+      id: '/admin/reviews/'
+      path: '/reviews'
+      fullPath: '/admin/reviews/'
+      preLoaderRoute: typeof AdminReviewsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_authed/account/orders/': {
+      id: '/_authed/account/orders/'
+      path: '/account/orders'
+      fullPath: '/account/orders/'
+      preLoaderRoute: typeof AuthedAccountOrdersIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/account/orders/$orderId': {
+      id: '/_authed/account/orders/$orderId'
+      path: '/account/orders/$orderId'
+      fullPath: '/account/orders/$orderId'
+      preLoaderRoute: typeof AuthedAccountOrdersOrderIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
 interface AuthedRouteChildren {
-  AuthedAccountRoute: typeof AuthedAccountRoute
+  AuthedCartRoute: typeof AuthedCartRoute
+  AuthedAccountIndexRoute: typeof AuthedAccountIndexRoute
+  AuthedAccountOrdersOrderIdRoute: typeof AuthedAccountOrdersOrderIdRoute
+  AuthedAccountOrdersIndexRoute: typeof AuthedAccountOrdersIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
-  AuthedAccountRoute: AuthedAccountRoute,
+  AuthedCartRoute: AuthedCartRoute,
+  AuthedAccountIndexRoute: AuthedAccountIndexRoute,
+  AuthedAccountOrdersOrderIdRoute: AuthedAccountOrdersOrderIdRoute,
+  AuthedAccountOrdersIndexRoute: AuthedAccountOrdersIndexRoute,
 }
 
 const AuthedRouteWithChildren =
   AuthedRoute._addFileChildren(AuthedRouteChildren)
 
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminAuthorsAuthorIdRoute: typeof AdminAuthorsAuthorIdRoute
+  AdminAuthorsNewRoute: typeof AdminAuthorsNewRoute
+  AdminBooksBookIdRoute: typeof AdminBooksBookIdRoute
+  AdminBooksNewRoute: typeof AdminBooksNewRoute
+  AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
+  AdminAuthorsIndexRoute: typeof AdminAuthorsIndexRoute
+  AdminBooksIndexRoute: typeof AdminBooksIndexRoute
+  AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
+  AdminReviewsIndexRoute: typeof AdminReviewsIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+  AdminAuthorsAuthorIdRoute: AdminAuthorsAuthorIdRoute,
+  AdminAuthorsNewRoute: AdminAuthorsNewRoute,
+  AdminBooksBookIdRoute: AdminBooksBookIdRoute,
+  AdminBooksNewRoute: AdminBooksNewRoute,
+  AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
+  AdminAuthorsIndexRoute: AdminAuthorsIndexRoute,
+  AdminBooksIndexRoute: AdminBooksIndexRoute,
+  AdminOrdersIndexRoute: AdminOrdersIndexRoute,
+  AdminReviewsIndexRoute: AdminReviewsIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
