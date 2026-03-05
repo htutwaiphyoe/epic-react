@@ -32,3 +32,19 @@ export const resetPasswordSchema = z.object({
 });
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const profileSchema = z.object({
+	name: z
+		.string()
+		.trim()
+		.min(1, "Name is required")
+		.max(255, "Name must be at most 255 characters"),
+	dob: z
+		.union([z.literal(""), z.iso.date("Use a date like 1990-01-31")])
+		.optional()
+		.transform((value) => (value ? value : undefined)),
+	profileUrl: z
+		.union([z.literal(""), z.url("Photo URL must be a valid URL")])
+		.optional()
+		.transform((value) => (value ? value : undefined)),
+});

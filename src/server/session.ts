@@ -46,6 +46,11 @@ export const writeTokens = async (
 	await session.update({ ...session.data, accessToken, refreshToken });
 };
 
+export const writeUser = async (user: SessionUser) => {
+	const session = await appSession();
+	await session.update({ ...session.data, user });
+};
+
 export const clearSession = async () => {
 	const session = await appSession();
 	await session.clear();

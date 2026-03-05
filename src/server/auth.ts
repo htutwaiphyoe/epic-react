@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import {
 	forgotPasswordSchema,
 	loginSchema,
+	profileSchema,
 	resetPasswordSchema,
 	signupSchema,
 } from "@/schemas/auth";
@@ -12,7 +13,9 @@ import {
 	readSession,
 	type SessionUser,
 	startSession,
+	writeUser,
 } from "./session";
+import type { ProfileResponse } from "./types";
 
 type AuthResponse = {
 	status: "success";
@@ -76,11 +79,29 @@ export const getSessionUserFn = createServerFn({ method: "GET" }).handler(
 	async () => (await readSession()).user ?? null,
 );
 
+export const updateProfileFn = createServerFn({ method: "POST" })
+	.validator(profileSchema)
+	.handler(async ({ data }) => {
+		const session = await readSession();
+		const current = session.user;
+
+		if (!current) {
+			throw new Error("You are not signed in.");
+		}
+
+		const body = await authedRequest<ProfileResponse>(`/users/${current.id}`, {
+			method: "PATCH",
+			body: data,
+		});
+
+		await writeUser({ ...current, name: body.user.name });
+
+		return body.user;
+	});
+
 export const getProfileFn = createServerFn({ method: "GET" }).handler(
 	async () => {
-		const body = await authedRequest<{ status: "success"; user: SessionUser }>(
-			"/users/me",
-		);
+		const body = await authedRequest<ProfileResponse>("/users/me");
 
 		return body.user;
 	},

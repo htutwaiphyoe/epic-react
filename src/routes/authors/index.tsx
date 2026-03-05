@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AuthorPortrait } from "@/features/authors/AuthorPortrait";
 import { Pagination } from "@/features/shared/Pagination";
 import type { SortOption } from "@/features/shared/SortSelect";
 import { SortSelect } from "@/features/shared/SortSelect";
@@ -27,14 +28,15 @@ function AuthorsPage() {
 
 	return (
 		<>
-			<div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-				<div>
-					<h1 className="font-semibold text-2xl tracking-tight">Authors</h1>
-					<p className="mt-1 text-muted-foreground text-sm">
-						{pagination.total} in the catalog
-					</p>
-				</div>
+			<header className="pb-8">
+				<h1 className="text-4xl">Authors</h1>
+				<p className="mt-2 text-muted-foreground">
+					World champions, trainers and storytellers — {pagination.total} of
+					them, in their own words.
+				</p>
+			</header>
 
+			<div className="rule-above flex items-center justify-end py-4">
 				<SortSelect
 					options={SORT_OPTIONS}
 					sortBy={search.sortBy}
@@ -46,31 +48,40 @@ function AuthorsPage() {
 			</div>
 
 			{authors.length === 0 ? (
-				<p className="py-20 text-center text-muted-foreground">
-					No authors yet.
-				</p>
+				<div className="rounded-sm border border-dashed py-24 text-center">
+					<p className="font-serif text-lg">No authors yet</p>
+				</div>
 			) : (
-				<ul className="divide-y rounded-lg border">
+				<div
+					data-testid="author-grid"
+					className="grid grid-cols-2 gap-x-6 gap-y-9 pt-9 sm:grid-cols-3 lg:grid-cols-5"
+				>
 					{authors.map((author) => (
-						<li key={author.id}>
-							<Link
-								to="/authors/$authorId"
-								params={{ authorId: author.id }}
-								className="flex items-baseline justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted/40"
-							>
-								<span className="font-medium">{author.name}</span>
-								<span className="text-muted-foreground text-sm">
-									{[author.nationality, author.birthDate?.slice(0, 4)]
-										.filter(Boolean)
-										.join(" · ")}
-								</span>
-							</Link>
-						</li>
+						<Link
+							key={author.id}
+							to="/authors/$authorId"
+							params={{ authorId: author.id }}
+							className="group block"
+						>
+							<div className="overflow-hidden rounded-sm ring-1 ring-black/5 transition-transform duration-200 group-hover:-translate-y-0.5">
+								<AuthorPortrait name={author.name} photoUrl={author.photoUrl} />
+							</div>
+
+							<h2 className="mt-3 font-serif text-[17px] leading-snug underline-offset-2 group-hover:underline">
+								{author.name}
+							</h2>
+
+							<p className="mt-0.5 text-muted-foreground text-sm tabular-nums">
+								{[author.nationality, author.birthDate?.slice(0, 4)]
+									.filter(Boolean)
+									.join(" · ")}
+							</p>
+						</Link>
 					))}
-				</ul>
+				</div>
 			)}
 
-			<Pagination pagination={pagination} />
+			<Pagination pagination={pagination} noun="author" />
 		</>
 	);
 }

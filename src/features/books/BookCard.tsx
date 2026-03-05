@@ -1,27 +1,36 @@
 import { Link } from "@tanstack/react-router";
 import { formatMoney, formatRating } from "@/lib/money";
 import type { Book } from "@/server/types";
+import { BookCover } from "./BookCover";
 
 export const BookCard = ({ book }: { book: Book }) => (
 	<Link
 		to="/books/$bookId"
 		params={{ bookId: book.id }}
-		className="flex flex-col rounded-lg border p-5 transition-colors hover:border-foreground/30 hover:bg-muted/40"
+		className="group block"
 	>
-		<h3 className="font-medium leading-snug">{book.title}</h3>
-
-		<div className="mt-auto flex items-baseline justify-between pt-6 text-sm">
-			<span className="font-semibold text-base">{formatMoney(book.price)}</span>
-
-			<span className="text-muted-foreground">
-				{book.ratingsCount > 0
-					? `${formatRating(book.ratingsAverage, book.ratingsCount)} · ${book.ratingsCount}`
-					: "No ratings"}
-			</span>
+		<div className="overflow-hidden rounded-sm shadow-sm ring-1 ring-black/5 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
+			<BookCover title={book.title} seed={book.id} coverUrl={book.coverUrl} />
 		</div>
 
-		{book.stock === 0 ? (
-			<span className="mt-2 text-destructive text-xs">Out of stock</span>
-		) : null}
+		<div className="mt-3">
+			<h3 className="font-medium text-[15px] leading-snug underline-offset-2 group-hover:underline">
+				{book.title}
+			</h3>
+
+			<div className="mt-1 flex items-baseline gap-2.5 text-sm">
+				<span className="tabular-nums">{formatMoney(book.price)}</span>
+
+				{book.ratingsCount > 0 && (
+					<span className="text-muted-foreground">
+						★ {formatRating(book.ratingsAverage, book.ratingsCount)}
+					</span>
+				)}
+
+				{book.stock === 0 && (
+					<span className="text-destructive">Out of stock</span>
+				)}
+			</div>
+		</div>
 	</Link>
 );

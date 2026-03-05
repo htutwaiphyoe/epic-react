@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { AuthorPortrait } from "@/features/authors/AuthorPortrait";
 import { BookGrid } from "@/features/books/BookGrid";
 import { Pagination } from "@/features/shared/Pagination";
 import { booksSearchSchema } from "@/schemas/catalog";
@@ -23,35 +24,54 @@ export const Route = createFileRoute("/authors/$authorId")({
 function AuthorDetailPage() {
 	const { author, books, pagination } = Route.useLoaderData();
 
+	const meta = [author.nationality, author.birthDate?.slice(0, 4)]
+		.filter(Boolean)
+		.join(" · ");
+
 	return (
 		<>
-			<header className="mb-10 max-w-2xl">
-				<h1 className="font-semibold text-3xl tracking-tight">{author.name}</h1>
-
-				<p className="mt-2 text-muted-foreground">
-					{[author.nationality, author.birthDate]
-						.filter(Boolean)
-						.join(" · born ")}
-				</p>
-
-				{author.bio ? (
-					<p className="mt-5 leading-relaxed">{author.bio}</p>
-				) : null}
-			</header>
-
-			<h2 className="mb-4 font-semibold text-xl tracking-tight">
-				Books ({pagination.total})
-			</h2>
-
-			<BookGrid books={books} />
-			<Pagination pagination={pagination} />
-
 			<Link
 				to="/authors"
-				className="mt-10 inline-block text-muted-foreground text-sm transition-colors hover:text-foreground"
+				className="text-muted-foreground text-sm transition-colors hover:text-foreground"
 			>
-				‹ All authors
+				← All authors
 			</Link>
+
+			<header className="mt-8 grid items-start gap-9 pb-12 sm:grid-cols-[220px_1fr]">
+				<div className="w-full max-w-[220px] overflow-hidden rounded-sm shadow-lg ring-1 ring-black/10">
+					<AuthorPortrait
+						name={author.name}
+						photoUrl={author.photoUrl}
+						size="detail"
+					/>
+				</div>
+
+				<div className="max-w-xl self-center">
+					{meta ? (
+						<p className="text-muted-foreground text-xs uppercase tracking-[0.2em]">
+							{meta}
+						</p>
+					) : null}
+
+					<h1 className="mt-4 text-5xl leading-[1.05]">{author.name}</h1>
+
+					{author.bio ? (
+						<p className="mt-6 text-[17px] leading-relaxed">{author.bio}</p>
+					) : null}
+				</div>
+			</header>
+
+			<section className="rule-above pt-12">
+				<h2 className="mb-7 text-2xl">
+					{pagination.total} {pagination.total === 1 ? "title" : "titles"}
+				</h2>
+
+				<BookGrid books={books} />
+
+				{pagination.totalPages > 1 ? (
+					<Pagination pagination={pagination} />
+				) : null}
+			</section>
 		</>
 	);
 }

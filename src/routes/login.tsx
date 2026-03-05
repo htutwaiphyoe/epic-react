@@ -7,8 +7,10 @@ import {
 } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
+import { AuthShell } from "@/features/auth/AuthShell";
 import { FormError } from "@/features/auth/FormError";
 import { FormField } from "@/features/auth/FormField";
+import { SubmitButton } from "@/features/auth/SubmitButton";
 import { loginSchema } from "@/schemas/auth";
 import { getSessionUserFn, loginFn } from "@/server/auth";
 
@@ -49,11 +51,31 @@ function LoginPage() {
 	});
 
 	return (
-		<div className="mx-auto max-w-sm">
-			<h1 className="font-semibold text-2xl tracking-tight">Sign in</h1>
+		<AuthShell
+			eyebrow="Welcome back"
+			title="Sign in."
+			description="Your cart, orders and reviews are waiting."
+			footer={
+				<>
+					<Link
+						to="/signup"
+						className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+					>
+						Create an account
+					</Link>
 
+					<Link
+						to="/forgot-password"
+						className="text-muted-foreground transition-colors hover:text-foreground"
+					>
+						Forgot password?
+					</Link>
+				</>
+			}
+		>
 			<form
-				className="mt-8 flex flex-col gap-5"
+				method="post"
+				className="flex flex-col gap-5"
 				onSubmit={(event) => {
 					event.preventDefault();
 					form.handleSubmit();
@@ -97,23 +119,12 @@ function LoginPage() {
 					)}
 				</form.Field>
 
-				<button
-					type="submit"
-					disabled={submitting}
-					className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground text-sm disabled:opacity-60"
-				>
-					{submitting ? "Signing in…" : "Sign in"}
-				</button>
+				<SubmitButton
+					label="Sign in"
+					pendingLabel="Signing in…"
+					pending={submitting}
+				/>
 			</form>
-
-			<div className="mt-6 flex justify-between text-muted-foreground text-sm">
-				<Link to="/signup" className="hover:text-foreground">
-					Create an account
-				</Link>
-				<Link to="/forgot-password" className="hover:text-foreground">
-					Forgot password?
-				</Link>
-			</div>
-		</div>
+		</AuthShell>
 	);
 }

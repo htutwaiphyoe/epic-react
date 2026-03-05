@@ -41,8 +41,11 @@ export const FormField = ({
 	const message = firstMessage(errors);
 
 	return (
-		<div className="flex flex-col gap-1.5">
-			<label htmlFor={name} className="font-medium text-sm">
+		<div className="flex flex-col gap-2">
+			<label
+				htmlFor={name}
+				className="text-muted-foreground text-xs uppercase tracking-[0.14em]"
+			>
 				{label}
 			</label>
 
@@ -52,12 +55,15 @@ export const FormField = ({
 				type={type}
 				value={value}
 				autoComplete={autoComplete}
+				aria-invalid={message ? true : undefined}
 				onChange={(event) => onChange(event.target.value)}
 				onBlur={onBlur}
-				className="rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+				className="rounded-sm border bg-card px-3.5 py-2.5 text-[15px] transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring aria-invalid:border-destructive/60"
 			/>
 
-			{message ? <p className="text-destructive text-sm">{message}</p> : null}
+			{message ? (
+				<p className="text-destructive text-[13px]">{message}</p>
+			) : null}
 		</div>
 	);
 };

@@ -1,9 +1,11 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
+import { AuthShell } from "@/features/auth/AuthShell";
 import { FormError } from "@/features/auth/FormError";
 import { FormField } from "@/features/auth/FormField";
+import { SubmitButton } from "@/features/auth/SubmitButton";
 import { resetPasswordSchema } from "@/schemas/auth";
 import { resetPasswordFn } from "@/server/auth";
 
@@ -14,56 +16,90 @@ export const Route = createFileRoute("/reset-password")({
 });
 
 function ResetPasswordPage() {
-	const router = useRouter();
 	const { token } = Route.useSearch();
 	const [error, setError] = useState<string>();
+	const [submitting, setSubmitting] = useState(false);
+	const [done, setDone] = useState(false);
 
 	const form = useForm({
 		defaultValues: { password: "" },
 		onSubmit: async ({ value }) => {
 			setError(undefined);
+			setSubmitting(true);
 			try {
 				await resetPasswordFn({
 					data: { token: token ?? "", password: value.password },
 				});
-				router.navigate({ to: "/login" });
+				setDone(true);
 			} catch (cause) {
 				setError(
 					cause instanceof Error
 						? cause.message
 						: "Could not reset your password.",
 				);
+			} finally {
+				setSubmitting(false);
 			}
 		},
 	});
 
 	if (!token) {
 		return (
-			<div className="mx-auto max-w-sm">
-				<h1 className="font-semibold text-2xl tracking-tight">
-					Reset password
-				</h1>
-				<p className="mt-3 text-muted-foreground">
-					This link is missing its token. Request a new one.
-				</p>
-				<Link
-					to="/forgot-password"
-					className="mt-6 inline-block text-muted-foreground text-sm hover:text-foreground"
-				>
-					Request a new link
-				</Link>
-			</div>
+			<AuthShell
+				eyebrow="Reset password"
+				title="This link is incomplete."
+				description="The link is missing its token, so we cannot tell which account to reset. Request a fresh one and it will work."
+				footer={
+					<Link
+						to="/forgot-password"
+						className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+					>
+						Request a new link
+					</Link>
+				}
+			>
+				{null}
+			</AuthShell>
+		);
+	}
+
+	if (done) {
+		return (
+			<AuthShell
+				eyebrow="Reset password"
+				title="Password updated."
+				description="Every other session has been signed out. Use your new password from here on."
+				footer={
+					<Link
+						to="/login"
+						className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+					>
+						Sign in
+					</Link>
+				}
+			>
+				{null}
+			</AuthShell>
 		);
 	}
 
 	return (
-		<div className="mx-auto max-w-sm">
-			<h1 className="font-semibold text-2xl tracking-tight">
-				Choose a new password
-			</h1>
-
+		<AuthShell
+			eyebrow="Reset password"
+			title="Choose a new password."
+			description="Pick something at least eight characters long."
+			footer={
+				<Link
+					to="/login"
+					className="text-muted-foreground transition-colors hover:text-foreground"
+				>
+					← Back to sign in
+				</Link>
+			}
+		>
 			<form
-				className="mt-8 flex flex-col gap-5"
+				method="post"
+				className="flex flex-col gap-5"
 				onSubmit={(event) => {
 					event.preventDefault();
 					form.handleSubmit();
@@ -89,13 +125,12 @@ function ResetPasswordPage() {
 					)}
 				</form.Field>
 
-				<button
-					type="submit"
-					className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground text-sm"
-				>
-					Reset password
-				</button>
+				<SubmitButton
+					label="Reset password"
+					pendingLabel="Saving…"
+					pending={submitting}
+				/>
 			</form>
-		</div>
+		</AuthShell>
 	);
 }

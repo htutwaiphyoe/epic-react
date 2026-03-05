@@ -1,8 +1,10 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { AuthShell } from "@/features/auth/AuthShell";
 import { FormError } from "@/features/auth/FormError";
 import { FormField } from "@/features/auth/FormField";
+import { SubmitButton } from "@/features/auth/SubmitButton";
 import { forgotPasswordSchema } from "@/schemas/auth";
 import { forgotPasswordFn } from "@/server/auth";
 
@@ -14,30 +16,51 @@ export const Route = createFileRoute("/forgot-password")({
 function ForgotPasswordPage() {
 	const [error, setError] = useState<string>();
 	const [sent, setSent] = useState<string>();
+	const [submitting, setSubmitting] = useState(false);
 
 	const form = useForm({
 		defaultValues: { email: "" },
 		onSubmit: async ({ value }) => {
 			setError(undefined);
+			setSubmitting(true);
 			try {
 				setSent(await forgotPasswordFn({ data: value }));
 			} catch (cause) {
 				setError(
 					cause instanceof Error ? cause.message : "Could not send the email.",
 				);
+			} finally {
+				setSubmitting(false);
 			}
 		},
 	});
 
 	return (
-		<div className="mx-auto max-w-sm">
-			<h1 className="font-semibold text-2xl tracking-tight">Reset password</h1>
-
+		<AuthShell
+			eyebrow="Forgot password"
+			title={sent ? "Check your inbox." : "Reset your password."}
+			description={
+				sent
+					? undefined
+					: "Give us the email on your account and we will send a link to set a new password."
+			}
+			footer={
+				<Link
+					to="/login"
+					className="text-muted-foreground transition-colors hover:text-foreground"
+				>
+					← Back to sign in
+				</Link>
+			}
+		>
 			{sent ? (
-				<p className="mt-6 text-muted-foreground">{sent}</p>
+				<p className="rounded-sm border bg-card px-4 py-4 text-[15px] leading-relaxed">
+					{sent}
+				</p>
 			) : (
 				<form
-					className="mt-8 flex flex-col gap-5"
+					method="post"
+					className="flex flex-col gap-5"
 					onSubmit={(event) => {
 						event.preventDefault();
 						form.handleSubmit();
@@ -63,20 +86,13 @@ function ForgotPasswordPage() {
 						)}
 					</form.Field>
 
-					<button
-						type="submit"
-						className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground text-sm"
-					>
-						Send reset link
-					</button>
+					<SubmitButton
+						label="Send reset link"
+						pendingLabel="Sending…"
+						pending={submitting}
+					/>
 				</form>
 			)}
-
-			<p className="mt-6 text-muted-foreground text-sm">
-				<Link to="/login" className="hover:text-foreground">
-					Back to sign in
-				</Link>
-			</p>
-		</div>
+		</AuthShell>
 	);
 }

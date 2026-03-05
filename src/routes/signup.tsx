@@ -6,8 +6,10 @@ import {
 	useRouter,
 } from "@tanstack/react-router";
 import { useState } from "react";
+import { AuthShell } from "@/features/auth/AuthShell";
 import { FormError } from "@/features/auth/FormError";
 import { FormField } from "@/features/auth/FormField";
+import { SubmitButton } from "@/features/auth/SubmitButton";
 import { signupSchema } from "@/schemas/auth";
 import { getSessionUserFn, signupFn } from "@/server/auth";
 
@@ -48,13 +50,25 @@ function SignupPage() {
 	});
 
 	return (
-		<div className="mx-auto max-w-sm">
-			<h1 className="font-semibold text-2xl tracking-tight">
-				Create an account
-			</h1>
-
+		<AuthShell
+			eyebrow="Join Kawi"
+			title="Create an account."
+			description="Keep a cart across devices, track orders and review what you have read."
+			footer={
+				<p className="text-muted-foreground">
+					Already have an account?{" "}
+					<Link
+						to="/login"
+						className="text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+					>
+						Sign in
+					</Link>
+				</p>
+			}
+		>
 			<form
-				className="mt-8 flex flex-col gap-5"
+				method="post"
+				className="flex flex-col gap-5"
 				onSubmit={(event) => {
 					event.preventDefault();
 					form.handleSubmit();
@@ -115,21 +129,12 @@ function SignupPage() {
 					)}
 				</form.Field>
 
-				<button
-					type="submit"
-					disabled={submitting}
-					className="rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground text-sm disabled:opacity-60"
-				>
-					{submitting ? "Creating…" : "Create account"}
-				</button>
+				<SubmitButton
+					label="Create account"
+					pendingLabel="Creating…"
+					pending={submitting}
+				/>
 			</form>
-
-			<p className="mt-6 text-muted-foreground text-sm">
-				Already have an account?{" "}
-				<Link to="/login" className="hover:text-foreground">
-					Sign in
-				</Link>
-			</p>
-		</div>
+		</AuthShell>
 	);
 }
