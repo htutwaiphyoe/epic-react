@@ -1,3 +1,13 @@
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+
 export type SortOption<TSort extends string> = {
 	value: TSort;
 	label: string;
@@ -10,45 +20,46 @@ type Props<TSort extends string> = {
 	onChange: (next: { sortBy?: TSort; orderBy?: "asc" | "desc" }) => void;
 };
 
-const selectClass =
-	"rounded-md border bg-background px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
-
 export const SortSelect = <TSort extends string>({
 	options,
 	sortBy,
 	orderBy,
 	onChange,
 }: Props<TSort>) => (
-	<div className="flex gap-2">
-		<label className="sr-only" htmlFor="sortBy">
-			Sort by
-		</label>
-		<select
-			id="sortBy"
-			value={sortBy}
-			onChange={(event) => onChange({ sortBy: event.target.value as TSort })}
-			className={selectClass}
-		>
-			{options.map((option) => (
-				<option key={option.value} value={option.value}>
-					{option.label}
-				</option>
-			))}
-		</select>
+	<div className="flex shrink-0 items-center gap-2">
+		<span className="text-muted-foreground text-xs uppercase tracking-[0.14em]">
+			Sort
+		</span>
 
-		<label className="sr-only" htmlFor="orderBy">
-			Order
-		</label>
-		<select
-			id="orderBy"
-			value={orderBy}
-			onChange={(event) =>
-				onChange({ orderBy: event.target.value as "asc" | "desc" })
-			}
-			className={selectClass}
+		<Select
+			value={sortBy}
+			onValueChange={(value) => onChange({ sortBy: value as TSort })}
 		>
-			<option value="desc">Descending</option>
-			<option value="asc">Ascending</option>
-		</select>
+			<SelectTrigger aria-label="Sort by" className="w-36 rounded-full">
+				<SelectValue />
+			</SelectTrigger>
+
+			<SelectContent>
+				{options.map((option) => (
+					<SelectItem key={option.value} value={option.value}>
+						{option.label}
+					</SelectItem>
+				))}
+			</SelectContent>
+		</Select>
+
+		<Button
+			variant="outline"
+			size="icon"
+			aria-label={orderBy === "desc" ? "Sort descending" : "Sort ascending"}
+			onClick={() => onChange({ orderBy: orderBy === "desc" ? "asc" : "desc" })}
+			className="rounded-full"
+		>
+			{orderBy === "desc" ? (
+				<ArrowDown className="size-4" strokeWidth={1.75} />
+			) : (
+				<ArrowUp className="size-4" strokeWidth={1.75} />
+			)}
+		</Button>
 	</div>
 );

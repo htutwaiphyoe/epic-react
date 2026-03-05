@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BookGrid } from "@/features/books/BookGrid";
 import { Pagination } from "@/features/shared/Pagination";
+import { SearchInput } from "@/features/shared/SearchInput";
 import type { SortOption } from "@/features/shared/SortSelect";
 import { SortSelect } from "@/features/shared/SortSelect";
 import { type BooksSearch, booksSearchSchema } from "@/schemas/catalog";
@@ -8,6 +9,7 @@ import { getBooksFn } from "@/server/books";
 
 const SORT_OPTIONS: readonly SortOption<BooksSearch["sortBy"]>[] = [
 	{ value: "createdAt", label: "Newest" },
+	{ value: "ratingsAverage", label: "Rating" },
 	{ value: "title", label: "Title" },
 	{ value: "price", label: "Price" },
 	{ value: "publishedDate", label: "Published" },
@@ -29,53 +31,51 @@ function BooksPage() {
 
 	return (
 		<>
-			<div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-				<div>
-					<h1 className="font-semibold text-2xl tracking-tight">Books</h1>
-					<p className="mt-1 text-muted-foreground text-sm">
-						{pagination.total} in the catalog
-					</p>
-				</div>
+			<header className="pb-8">
+				<h1 className="text-4xl">Books</h1>
+				<p className="mt-2 text-muted-foreground">
+					{search.search ? (
+						<>
+							{pagination.total}{" "}
+							{pagination.total === 1 ? "book matches" : "books match"}{" "}
+							<span className="text-foreground">“{search.search}”</span>
+						</>
+					) : (
+						<>
+							Openings, middlegames, endgames — {pagination.total} ways to get
+							better.
+						</>
+					)}
+				</p>
+			</header>
 
-				<div className="flex flex-wrap items-center gap-2">
-					<form
-						onSubmit={(event) => {
-							event.preventDefault();
-							const value = new FormData(event.currentTarget)
-								.get("search")
-								?.toString()
-								.trim();
-							navigate({
-								search: (prev) => ({
-									...prev,
-									search: value || undefined,
-									page: 1,
-								}),
-							});
-						}}
-					>
-						<input
-							name="search"
-							type="search"
-							placeholder="Search titles…"
-							defaultValue={search.search ?? ""}
-							className="rounded-md border bg-background px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-						/>
-					</form>
+			<div className="rule-above flex flex-wrap items-center justify-between gap-4 py-5">
+				<SearchInput
+					value={search.search ?? ""}
+					placeholder="Search titles…"
+					onChange={(value) =>
+						navigate({
+							search: (prev) => ({ ...prev, search: value, page: 1 }),
+							replace: true,
+							resetScroll: false,
+						})
+					}
+				/>
 
-					<SortSelect
-						options={SORT_OPTIONS}
-						sortBy={search.sortBy}
-						orderBy={search.orderBy}
-						onChange={(next) =>
-							navigate({ search: (prev) => ({ ...prev, ...next, page: 1 }) })
-						}
-					/>
-				</div>
+				<SortSelect
+					options={SORT_OPTIONS}
+					sortBy={search.sortBy}
+					orderBy={search.orderBy}
+					onChange={(next) =>
+						navigate({ search: (prev) => ({ ...prev, ...next, page: 1 }) })
+					}
+				/>
 			</div>
 
-			<BookGrid books={books} />
-			<Pagination pagination={pagination} />
+			<div className="pt-9">
+				<BookGrid books={books} />
+				<Pagination pagination={pagination} />
+			</div>
 		</>
 	);
 }
