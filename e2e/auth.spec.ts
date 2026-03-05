@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 const SEEDED = {
-	email: "jisukjin@mailinator.com",
-	password: "RunningMan2010!",
+	name: "Jee Seok-jin",
+	email: "jeeseokjin@mailinator.com",
+	password: "KawiSeed2026!",
 };
 
 const signIn = async (page: import("@playwright/test").Page) => {
@@ -20,7 +21,7 @@ test("guards /account and redirects back after signing in", async ({
 	await signIn(page);
 
 	await expect(page).toHaveURL(/\/account/);
-	await expect(page.getByRole("heading", { name: "Account" })).toBeVisible();
+	await expect(page.getByRole("heading", { name: SEEDED.name })).toBeVisible();
 	await expect(page.getByText(SEEDED.email)).toBeVisible();
 });
 

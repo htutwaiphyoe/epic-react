@@ -14,3 +14,5 @@ todos.json
 .superpowers/
 test-results/
 playwright-report/
+e2e/.session.json
+e2e/.admin-session.json

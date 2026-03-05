@@ -1,20 +1,21 @@
 import { expect, test } from "@playwright/test";
 
+const gridCardTitles = (page: import("@playwright/test").Page) =>
+	page.getByTestId("book-grid").locator("a[href^='/books/'] h3");
+
 test("browses from home to a book detail page", async ({ page }) => {
 	await page.goto("/");
-	await expect(
-		page.getByRole("heading", { name: "Chess books, catalogued." }),
-	).toBeVisible();
+	await expect(page.getByRole("heading", { name: /The chess/ })).toBeVisible();
 
-	await page.getByRole("link", { name: "Browse all books" }).click();
+	await page.getByRole("link", { name: "Browse the catalog" }).click();
 	await expect(page).toHaveURL(/\/books/);
 	await expect(
 		page.getByRole("heading", { name: "Books", level: 1 }),
 	).toBeVisible();
 
-	const firstCard = page.locator("a[href^='/books/']").first();
-	const title = await firstCard.locator("h3").innerText();
-	await firstCard.click();
+	const firstTitle = gridCardTitles(page).first();
+	const title = await firstTitle.innerText();
+	await firstTitle.click();
 
 	await expect(
 		page.getByRole("heading", { level: 1, name: title }),
@@ -22,36 +23,40 @@ test("browses from home to a book detail page", async ({ page }) => {
 });
 
 test("sorting writes to the URL and reorders results", async ({ page }) => {
-	const firstTitle = page.locator("a[href^='/books/'] h3").first();
-
 	await page.goto("/books?sortBy=price&orderBy=asc");
-	await expect(firstTitle).toHaveText("Chess Fundamentals");
+	await expect(gridCardTitles(page).first()).toHaveText(
+		"Bobby Fischer Teaches Chess",
+	);
 
-	await page.locator("#orderBy").selectOption("desc");
+	await page.getByRole("button", { name: "Sort ascending" }).click();
 	await expect(page).toHaveURL(/orderBy=desc/);
-	await expect(firstTitle).toHaveText("Dvoretsky's Endgame Manual");
+	await expect(gridCardTitles(page).first()).toHaveText(
+		"The Oxford Companion to Chess",
+	);
+
+	await page.getByRole("combobox", { name: "Sort by" }).click();
+	await page.getByRole("option", { name: "Title" }).click();
+	await expect(page).toHaveURL(/sortBy=title/);
 });
 
 test("search filters the catalog", async ({ page }) => {
 	await page.goto("/books");
 
-	await page.getByPlaceholder("Search titles…").fill("endgame");
+	await page.getByPlaceholder("Search titles…").fill("dummies");
 	await page.getByPlaceholder("Search titles…").press("Enter");
 
-	await expect(page).toHaveURL(/search=endgame/);
-	await expect(page.locator("a[href^='/books/'] h3")).toHaveCount(1);
-	await expect(page.locator("a[href^='/books/'] h3").first()).toContainText(
-		"Endgame Manual",
-	);
+	await expect(page).toHaveURL(/search=dummies/);
+	await expect(gridCardTitles(page)).toHaveCount(1);
+	await expect(gridCardTitles(page).first()).toContainText("Chess for Dummies");
 });
 
 test("pagination moves between pages", async ({ page }) => {
-	await page.goto("/books?limit=4");
-	await expect(page.getByText(/Page 1 of 3/)).toBeVisible();
+	await page.goto("/books?limit=10");
+	await expect(page.getByText("1 / 3")).toBeVisible();
 
-	await page.getByRole("link", { name: "Next ›" }).click();
+	await page.getByRole("link", { name: "Next" }).click();
 	await expect(page).toHaveURL(/page=2/);
-	await expect(page.getByText(/Page 2 of 3/)).toBeVisible();
+	await expect(page.getByText("2 / 3")).toBeVisible();
 });
 
 test("an author page lists that author's books", async ({ page }) => {
@@ -60,12 +65,17 @@ test("an author page lists that author's books", async ({ page }) => {
 		page.getByRole("heading", { name: "Authors", level: 1 }),
 	).toBeVisible();
 
-	const firstAuthor = page.locator("a[href^='/authors/']").first();
-	const name = await firstAuthor.locator("span").first().innerText();
+	const firstAuthor = page
+		.getByTestId("author-grid")
+		.locator("a[href^='/authors/']")
+		.first();
+	const name = await firstAuthor.locator("h2").innerText();
 	await firstAuthor.click();
 
 	await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
-	await expect(page.getByRole("heading", { name: /^Books \(/ })).toBeVisible();
+	await expect(
+		page.getByRole("heading", { name: /^\d+ titles?$/ }),
+	).toBeVisible();
 });
 
 test("an unknown book id renders the error boundary, not a crash", async ({
