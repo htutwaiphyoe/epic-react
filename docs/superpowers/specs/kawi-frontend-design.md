@@ -17,8 +17,8 @@ One codebase, one session, one navigation model. Which surface a person sees is 
 
 **Deliberately out of scope:**
 
-- **Server-side cart.** The API has no cart resource; `POST /api/v1/orders` accepts the complete item list in one call. v1 keeps the cart in `localStorage`. A future `carts` resource is planned — the checkout boundary is designed so it can be swapped in without touching UI components.
-- **Payments.** Orders transition `pending → paid` via an admin action, not a payment provider.
+- **Guest carts.** The cart is server-side and keyed by `userId`, so it requires an account. Adding to the cart while signed out redirects to `/login?redirect=…`. A guest cart would need an anonymous cart token plus merge-on-login rules; not in v1.
+- **Payments.** Orders transition `pending → paid` via an admin action, not a payment provider. Checkout creates a `pending` order and decrements stock; `cancelOrder` restores it.
 - **HTTPS/custom domain.** The API is currently reachable over plain HTTP at an ephemeral Fargate IP. Not blocking, but see *Configuration*.
 
 ## Stack
@@ -27,17 +27,19 @@ One codebase, one session, one navigation model. Which surface a person sees is 
 |---|---|
 | Framework | TanStack Start (React), TypeScript, Vite plugin |
 | Routing | TanStack Router (file-based, bundled with Start) |
-| Server state | TanStack Query v5 |
+| Server state | Router loaders calling server functions — no TanStack Query |
 | Forms | TanStack Form + Zod v4 |
-| Tables | TanStack Table |
+| Tables | TanStack Table — planned for the console (M6/M7), not yet installed |
 | Styling | Tailwind CSS v4 |
-| Components | shadcn/ui |
-| Unit / integration | Vitest + MSW |
+| Components | shadcn/ui primitives, plus hand-written feature components |
+| Unit / integration | Vitest |
 | E2E | Playwright |
 
 **Version pinning is required.** TanStack Start is pre-1.0 — the RC API is declared stable and preparing for 1.0, but exact versions must be pinned in `package.json` and upgraded deliberately, not via ranges.
 
 Zod v4 matches the backend's `zod ^4.4.3`, so validation rules can be mirrored rather than reinvented.
+
+**No TanStack Query.** Route loaders call server functions directly and `router.invalidate()` refetches after a mutation, so there is no second cache to keep coherent. This has one consequence worth stating, because the Start template's default assumes otherwise: `defaultPreloadStaleTime` must be a real duration (30s), not `0`. The template ships `0` on the assumption that Query owns caching — with loaders alone it means every hover refetches, which drains the backend's rate limit.
 
 ## Architecture
 
@@ -70,7 +72,8 @@ The accepted cost is one extra hop on client-side navigation, and that the kawi 
 | `authenticate` | `POST /auth/signup` \| `/login` | public |
 | `signOut` | `POST /auth/logout` | session |
 | `getCurrentUser` | `GET /users/me` | session |
-| `submitOrder` | `POST /orders` | session |
+| `cart` | `GET /cart`, `POST /cart/items`, `PATCH`/`DELETE /cart/items/:id`, `DELETE /cart` | session |
+| `checkout` | `POST /cart/checkout` — optional `itemIds` to order part of the cart | session |
 | `getMyOrders` | `GET /orders`, `GET /orders/:id`, `PATCH /orders/:id/cancel` | session |
 | `submitReview` | `POST /books/:bookId/reviews`, `PATCH`/`DELETE /reviews/:id` | session |
 | `adminBooks` | book create/update/delete | role-checked |
@@ -116,10 +119,12 @@ Two shells sharing one session.
 | `/books` | public — grid; `search`/`page`/`sortBy`/`orderBy` held in URL search params | `true` |
 | `/books/$bookId` | public — detail, reviews, write-review form when eligible | `true` |
 | `/authors`, `/authors/$authorId` | public — author and their books | `true` |
-| `/cart` | public — localStorage cart, checkout requires auth | `false` |
 | `/login`, `/signup`, `/forgot-password`, `/reset-password` | public | `true` |
+| `/cart` | authenticated — server cart, per-line quantity and selection, checkout | `'data-only'` |
 | `/account` | authenticated — profile | `'data-only'` |
 | `/account/orders`, `/account/orders/$orderId` | authenticated — history, cancel pending | `'data-only'` |
+
+The four authenticated storefront routes live under the pathless `_authed` layout, which owns the `beforeLoad` session check and the `ssr: 'data-only'` setting; they inherit both. So `_authed/cart.tsx` serves `/cart`, and `/account` is a directory (`_authed/account/index.tsx`) so `/account/orders` can nest beneath it.
 
 **Console shell** (sidebar):
 
@@ -152,7 +157,7 @@ Reasoning per group:
 
 - **Public catalog — `ssr: true`.** These are the only pages a search engine will ever see, and first paint matters for a storefront.
 - **Auth forms — `ssr: true`.** Two reasons. `beforeLoad` runs on the server, so a visitor who is *already* signed in gets redirected away from `/login` before any HTML ships — the mirror image of the guard on `/account`. And these are common entry points from bookmarks and email links, so the form should paint before JavaScript arrives rather than after. `/reset-password` reads its `token` from search params, which are available server-side.
-- **`/cart` — `ssr: false`, and this one is not optional.** The cart lives in `localStorage`, a browser-only API. Server-rendering it would produce a guaranteed hydration mismatch, since the server cannot know the cart contents.
+- **`/cart` — `'data-only'`, inherited from `_authed`.** The cart is server state keyed by `userId`, so it needs the same server-side guard as `/account`: an unauthenticated visitor is redirected before any HTML ships. Component SSR would be wasted — the page is private and never indexed — but the loader still runs on the server, so the cart arrives with the first response rather than after a client fetch.
 - **`/account/*` and `/admin/*` — `'data-only'`.** No SEO value, so component SSR is wasted — but `beforeLoad` still runs on the server, which is what makes a clean auth redirect possible. An unauthenticated visitor is redirected to `/login` *before any HTML ships*. With `ssr: false` the session check happens after hydration, giving a spinner and a visible flash before the redirect.
 
 That last point is the real reason not to simply set `false` on everything behind auth: `'data-only'` buys server-side redirects and role checks without paying for component rendering.
@@ -169,18 +174,20 @@ src/
   server/
     api-client.ts           ONLY place that knows the API base URL and error shape
     session.ts              ONLY place that reads/writes the session cookie
-    books.server.ts         server functions per resource
-    authors.server.ts
-    auth.server.ts
-    orders.server.ts
-    reviews.server.ts
-    users.server.ts
+    authed.ts               authenticated request + single-flight token refresh
+    books.ts                server functions per resource
+    authors.ts
+    auth.ts
+    cart.ts
+    orders.ts
+    reviews.ts
+    users.ts
   features/
     books/ authors/ cart/ orders/ reviews/ admin/
                             components + hooks per domain; no direct fetch
   components/ui/            shadcn primitives
   schemas/                  Zod schemas shared between forms and server fn validators
-  lib/                      formatters, cart reducer, utils
+  lib/                      money helpers (integer cents), formatters, utils
 ```
 
 Rules, chosen to keep each unit independently understandable:
@@ -232,11 +239,20 @@ Every route defines an `errorComponent`; the root defines a `notFoundComponent`.
 
 ## Testing
 
-- **Vitest unit** — `api-client` error normalization for all three shapes, the refresh single-flight guard, the cart reducer, money-string formatting
-- **Vitest + MSW integration** — server functions against a mocked kawi API, including 401-then-refresh and 403 ownership paths
-- **Playwright E2E** — against a locally running backend (`docker compose up`), never the deployed instance, to avoid polluting real data. Two core journeys: *signup → browse → cart → order → review*, and *admin creates author → creates book → advances order status*.
+- **Vitest unit** — `api-client` error normalization for all three shapes, the refresh single-flight guard, money-string arithmetic in integer cents
+- **Playwright E2E** — against a locally running backend (`docker compose up`), never the deployed instance, to avoid polluting real data. Journeys: *browse → add to cart → adjust quantity → part-checkout → order history → cancel*, and later *admin creates author → creates book → advances order status*.
 
-The backend's own 51 tests already cover API behaviour; frontend tests target the layers the backend cannot see — session handling, error mapping, cart logic, and role gating.
+E2E runs against the **production build**, not the dev server: in dev, Vite compiles client route chunks on demand, so a click can land before the route has hydrated and the test fails on timing rather than behaviour.
+
+Three Playwright projects, because the cart forced the structure:
+
+| Project | Contents | Why |
+|---|---|---|
+| `setup` | signs in once, saves `storageState` | `authLimiter` allows 10 sign-ins per 15 minutes; one login per run instead of one per test |
+| `anonymous` | auth + catalog specs | parallel, no shared state |
+| `signed-in` | cart + order specs, `workers: 1`, serial | the cart is one row set per user, so parallel tests would race each other |
+
+The backend's own tests cover API behaviour; frontend tests target the layers the backend cannot see — session handling, error mapping, quantity and selection logic, and role gating.
 
 ## Implementation order
 
@@ -247,7 +263,7 @@ This is a large surface for one pass, so it is built in milestones that each end
 | M1 | Scaffold, Tailwind, shadcn, `api-client.ts`, `session.ts`, storefront shell | A styled shell that can call the API server-side |
 | M2 | Public catalog — `/books`, `/books/$bookId`, `/authors`, `/authors/$authorId` | Browsable, searchable, SSR'd catalog with no auth |
 | M3 | Auth — signup, login, logout, refresh single-flight, `/account` | A user can register and stay logged in across reloads |
-| M4 | Cart + checkout — localStorage cart, `/cart`, `POST /orders`, `/account/orders` | A user can buy something and see the order |
+| M4 | Cart + checkout — server cart under `_authed`, `/cart` with quantity and line selection, `POST /cart/checkout`, `/account/orders` | A user can buy something and see the order |
 | M5 | Reviews — review form gated on purchase, review list on book detail | The purchase-gated review path works end to end |
 | M6 | Console shell + books/authors CRUD with per-row ownership | A publisher can manage their own catalog |
 | M7 | Admin-only — orders with status transitions, users with roles | Full admin capability |
