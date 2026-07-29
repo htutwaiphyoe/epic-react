@@ -52,7 +52,7 @@ browser ──(same-origin RPC)──▶ Start server fn ──(Bearer)──▶
 
 This yields four properties:
 
-1. **SSR on every navigation.** A TanStack Router `loader` runs on the server for the initial request but in the browser for client-side navigations. Routing reads through server functions makes "public reads are server-rendered" true in both cases.
+1. **Data fetching is always server-side.** A TanStack Router `loader` runs on the server for the initial request but in the browser for client-side navigations. Because loaders call server functions rather than `fetch`, the actual API call happens on the server either way. Note this is about *where data is fetched*, not *where HTML is rendered* — see [Rendering strategy](#rendering-strategy) for the latter, which is decided per route.
 2. **No CORS surface.** Same-origin RPC means `CORS_ORIGIN` on the backend never needs configuring, including for preview deployments with generated hostnames.
 3. **Tokens never reach JavaScript.** They live in the Start session cookie, readable only server-side.
 4. **One data-access pattern.** Error normalization, token refresh, and retry logic are written once.
@@ -111,28 +111,54 @@ Two shells sharing one session.
 
 **Storefront shell** (header + footer):
 
-| Route | Access |
-|---|---|
-| `/` | public — featured books, search entry |
-| `/books` | public — grid; `search`/`page`/`sortBy`/`orderBy` held in URL search params |
-| `/books/$bookId` | public — detail, reviews, write-review form when eligible |
-| `/authors`, `/authors/$authorId` | public — author and their books |
-| `/cart` | public — localStorage cart, checkout requires auth |
-| `/login`, `/signup`, `/forgot-password`, `/reset-password` | public |
-| `/account` | authenticated — profile |
-| `/account/orders`, `/account/orders/$orderId` | authenticated — history, cancel pending |
+| Route | Access | `ssr` |
+|---|---|---|
+| `/` | public — featured books, search entry | `true` |
+| `/books` | public — grid; `search`/`page`/`sortBy`/`orderBy` held in URL search params | `true` |
+| `/books/$bookId` | public — detail, reviews, write-review form when eligible | `true` |
+| `/authors`, `/authors/$authorId` | public — author and their books | `true` |
+| `/cart` | public — localStorage cart, checkout requires auth | `false` |
+| `/login`, `/signup`, `/forgot-password`, `/reset-password` | public | `false` |
+| `/account` | authenticated — profile | `'data-only'` |
+| `/account/orders`, `/account/orders/$orderId` | authenticated — history, cancel pending | `'data-only'` |
 
 **Console shell** (sidebar):
 
-| Route | Access |
-|---|---|
-| `/admin` | `admin` + `publisher` — overview |
-| `/admin/books`, `/admin/books/new`, `/admin/books/$bookId` | `admin` + `publisher` (own rows only) |
-| `/admin/authors`, `/admin/authors/new`, `/admin/authors/$authorId` | `admin` + `publisher` (own rows only) |
-| `/admin/orders`, `/admin/orders/$orderId` | `admin` only — status transitions |
-| `/admin/users` | `admin` only — roles, deactivate/reactivate |
+| Route | Access | `ssr` |
+|---|---|---|
+| `/admin` | `admin` + `publisher` — overview | `'data-only'` |
+| `/admin/books`, `/admin/books/new`, `/admin/books/$bookId` | `admin` + `publisher` (own rows only) | `'data-only'` |
+| `/admin/authors`, `/admin/authors/new`, `/admin/authors/$authorId` | `admin` + `publisher` (own rows only) | `'data-only'` |
+| `/admin/orders`, `/admin/orders/$orderId` | `admin` only — status transitions | `'data-only'` |
+| `/admin/users` | `admin` only — roles, deactivate/reactivate | `'data-only'` |
 
 URL-as-state for catalog filters is deliberate: it makes list views shareable, back-button correct, and directly serialisable to the API's `page`/`limit`/`sortBy`/`orderBy` params. TanStack Table's sorting and pagination model maps onto the same params in the console.
+
+## Rendering strategy
+
+Server functions and SSR are independent decisions, and conflating them leads to paying for rendering nobody benefits from.
+
+- **Server functions** are required wherever a request needs a token. The browser cannot read the httpOnly session, so it cannot attach a `Bearer` header itself. This applies to every authenticated call regardless of rendering mode.
+- **SSR** is only worth its cost where HTML-on-first-byte matters — public, indexable pages.
+
+Start supports three per-route modes plus a function form. Children inherit and may only become *more* restrictive (`true → 'data-only' → false`, never the reverse), which fits one setting per shell.
+
+| Mode | `beforeLoad` / `loader` | Component HTML |
+|---|---|---|
+| `true` | server | server |
+| `'data-only'` | server | client |
+| `false` | client | client |
+
+Reasoning per group:
+
+- **Public catalog — `ssr: true`.** These are the only pages a search engine will ever see, and first paint matters for a storefront.
+- **Auth forms — `ssr: false`.** No SEO value, no data to preload, and pure client rendering avoids hydration concerns on controlled inputs.
+- **`/cart` — `ssr: false`, and this one is not optional.** The cart lives in `localStorage`, a browser-only API. Server-rendering it would produce a guaranteed hydration mismatch, since the server cannot know the cart contents.
+- **`/account/*` and `/admin/*` — `'data-only'`.** No SEO value, so component SSR is wasted — but `beforeLoad` still runs on the server, which is what makes a clean auth redirect possible. An unauthenticated visitor is redirected to `/login` *before any HTML ships*. With `ssr: false` the session check happens after hydration, giving a spinner and a visible flash before the redirect.
+
+That last point is the real reason not to simply set `false` on everything behind auth: `'data-only'` buys server-side redirects and role checks without paying for component rendering.
+
+The root `shellComponent` is always server-rendered regardless — the `<html>` wrapper cannot be client-only.
 
 ## Module boundaries
 
