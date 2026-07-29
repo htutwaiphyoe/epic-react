@@ -118,7 +118,7 @@ Two shells sharing one session.
 | `/books/$bookId` | public — detail, reviews, write-review form when eligible | `true` |
 | `/authors`, `/authors/$authorId` | public — author and their books | `true` |
 | `/cart` | public — localStorage cart, checkout requires auth | `false` |
-| `/login`, `/signup`, `/forgot-password`, `/reset-password` | public | `false` |
+| `/login`, `/signup`, `/forgot-password`, `/reset-password` | public | `true` |
 | `/account` | authenticated — profile | `'data-only'` |
 | `/account/orders`, `/account/orders/$orderId` | authenticated — history, cancel pending | `'data-only'` |
 
@@ -152,7 +152,7 @@ Start supports three per-route modes plus a function form. Children inherit and 
 Reasoning per group:
 
 - **Public catalog — `ssr: true`.** These are the only pages a search engine will ever see, and first paint matters for a storefront.
-- **Auth forms — `ssr: false`.** No SEO value, no data to preload, and pure client rendering avoids hydration concerns on controlled inputs.
+- **Auth forms — `ssr: true`.** Two reasons. `beforeLoad` runs on the server, so a visitor who is *already* signed in gets redirected away from `/login` before any HTML ships — the mirror image of the guard on `/account`. And these are common entry points from bookmarks and email links, so the form should paint before JavaScript arrives rather than after. `/reset-password` reads its `token` from search params, which are available server-side.
 - **`/cart` — `ssr: false`, and this one is not optional.** The cart lives in `localStorage`, a browser-only API. Server-rendering it would produce a guaranteed hydration mismatch, since the server cannot know the cart contents.
 - **`/account/*` and `/admin/*` — `'data-only'`.** No SEO value, so component SSR is wasted — but `beforeLoad` still runs on the server, which is what makes a clean auth redirect possible. An unauthenticated visitor is redirected to `/login` *before any HTML ships*. With `ssr: false` the session check happens after hydration, giving a spinner and a visible flash before the redirect.
 
